@@ -157,39 +157,84 @@
   
         <!-- 打电话 Tab -->
         <el-tab-pane label="打电话" name="dadianhua">
-          <div class="tab-content">
-            <el-radio-group v-model="callForm.type">
-              <el-radio label="虚拟号">虚拟号</el-radio>
-              <el-radio label="实体号">实体号</el-radio>
-            </el-radio-group>
-  
-            <el-form label-width="90px" style="margin-top: 20px;">
-              <el-form-item label="号码归属地">
-                <el-select v-model="callForm.location" placeholder="CN/中国 +86">
-                  <el-option label="CN/中国 +86" value="CN+86"></el-option>
-                  <el-option label="US/美国 +1" value="US+1"></el-option>
-                  <el-option label="HK/香港 +852" value="HK+852"></el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item label="租期">
-                <el-radio-group v-model="callForm.rentPeriod">
-                  <el-radio label="日租">日租</el-radio>
-                  <el-radio label="周租">周租</el-radio>
-                  <el-radio label="月租">月租</el-radio>
-                  <el-radio label="季租">季租</el-radio>
-                </el-radio-group>
-              </el-form-item>
-              <el-form-item label="套餐">
-                <el-radio-group v-model="callForm.packageType">
-                  <el-radio label="隐私电话">隐私电话</el-radio>
-                  <el-radio label="隐私短信">隐私短信</el-radio>
-                </el-radio-group>
-              </el-form-item>
-            </el-form>
-  
-            <p class="estimate-fee">预计费用：{{ callForm.estimatedFee }} USDT</p>
-            <el-button type="primary" @click="onBuyNumber">立即购买</el-button>
-          </div>
+            <div class="tab-content">
+                <!-- 使用 el-timeline 将各步骤分成多个节点 -->
+                <el-timeline>
+
+                <!-- 第一步：选择 虚拟号/实体号 -->
+                <el-timeline-item>
+                    <!-- 时间戳标题，可自定义文字 -->
+                    <div class="el-timeline-item__timestamp is-top">虚拟号/实体号</div>
+                    <!-- 内容区 -->
+                    <div class="el-timeline-item__content">
+                    <el-card class="is-always-shadow">
+                        <div class="el-card__body">
+                        <el-radio-group v-model="callForm.type">
+                            <el-radio label="虚拟号">虚拟号</el-radio>
+                            <el-radio label="实体号">实体号</el-radio>
+                        </el-radio-group>
+                        </div>
+                    </el-card>
+                    </div>
+                </el-timeline-item>
+
+                <!-- 第二步：号码归属地 -->
+                <el-timeline-item>
+                    <div class="el-timeline-item__timestamp is-top">号码归属地</div>
+                    <div class="el-timeline-item__content">
+                    <el-card class="is-always-shadow">
+                        <div class="el-card__body">
+                        <el-select v-model="callForm.location" placeholder="CN/中国 +86" style="width: 80%;">
+                            <el-option label="CN/中国 +86" value="CN+86"></el-option>
+                            <el-option label="US/美国 +1" value="US+1"></el-option>
+                            <el-option label="HK/香港 +852" value="HK+852"></el-option>
+                            <!-- ...其他选项 -->
+                        </el-select>
+                        </div>
+                    </el-card>
+                    </div>
+                </el-timeline-item>
+
+                <!-- 第三步：租期 -->
+                <el-timeline-item>
+                    <div class="el-timeline-item__timestamp is-top">租期</div>
+                    <div class="el-timeline-item__content">
+                    <el-card class="is-always-shadow">
+                        <div class="el-card__body">
+                        <el-radio-group v-model="callForm.rentPeriod">
+                            <el-radio label="日租">日租</el-radio>
+                            <el-radio label="周租">周租</el-radio>
+                            <el-radio label="月租">月租</el-radio>
+                            <el-radio label="季租">季租</el-radio>
+                        </el-radio-group>
+                        </div>
+                    </el-card>
+                    </div>
+                </el-timeline-item>
+
+                <!-- 第四步：套餐 -->
+                <el-timeline-item>
+                    <div class="el-timeline-item__timestamp is-top">套餐</div>
+                    <div class="el-timeline-item__content">
+                    <el-card class="is-always-shadow">
+                        <div class="el-card__body">
+                        <el-radio-group v-model="callForm.packageType">
+                            <el-radio label="隐私电话">隐私电话</el-radio>
+                            <el-radio label="隐私短信">隐私短信</el-radio>
+                        </el-radio-group>
+                        </div>
+                    </el-card>
+                    </div>
+                </el-timeline-item>
+
+                </el-timeline>
+
+                <!-- 底部：费用 + 购买按钮 -->
+                <p class="estimate-fee">预计费用：{{ callForm.estimatedFee }} USDT</p>
+                <el-button type="primary" @click="onBuyNumber" style="width: 100%;">
+                立即购买
+                </el-button>
+            </div>
         </el-tab-pane>
   
         <!-- 充值 Tab -->
