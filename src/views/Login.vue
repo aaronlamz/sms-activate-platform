@@ -40,6 +40,7 @@
 </template>
 
 <script>
+import { loginApi } from '@/api/user'
 export default {
   name: 'Login',
   data() {
@@ -52,14 +53,24 @@ export default {
     }
   },
   methods: {
-    handleLogin() {
+    async handleLogin() {
       if (!this.loginForm.username || !this.loginForm.password) {
         this.$message.error('请输入账号和密码')
         return
       }
-      // TODO: 调用登录接口
-      this.$message.success('登录成功')
-      // this.$router.push('/')
+      try {
+        const res = await loginApi({
+          username: this.loginForm.username,
+          password: this.loginForm.password,
+        })
+        this.$message.success('登录成功')
+        // 例如保存 token
+        localStorage.setItem('token', res.token)
+        this.$router.push('/')
+      } catch (error) {
+        // 错误已在 request.js 拦截器中处理，也可以在此处进一步处理
+        console.error('登录错误：', error)
+      }
     },
   },
 }
