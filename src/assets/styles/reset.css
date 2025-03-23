@@ -8,9 +8,15 @@
   padding: 0;
 }
 
-html, body {
+html,
+body {
   height: 100%;
-  font-family: Microsoft YaHei, Arial, Helvetica, Tahoma, sans-serif;
+  font-family:
+    Microsoft YaHei,
+    Arial,
+    Helvetica,
+    Tahoma,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   font-size: 13px;
   background-color: #ededee;
@@ -23,7 +29,8 @@ img {
 }
 
 /* 去除列表默认样式 */
-ul, ol {
+ul,
+ol {
   list-style: none;
 }
 
@@ -31,4 +38,13 @@ ul, ol {
 a {
   text-decoration: none;
   color: inherit;
+}
+
+.el-col {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.el-row {
+  margin-left: 0px !important;
+  margin-right: 0px !important;
 }
