@@ -2,6 +2,7 @@ const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
   transpileDependencies: true,
   devServer: {
+    open: true, // 自动打开浏览器
     proxy: {
       '/api': {
         target: 'http://localhost:3000', // 后端服务地址
