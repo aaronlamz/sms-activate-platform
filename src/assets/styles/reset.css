@@ -10,10 +10,10 @@
 
 html, body {
   height: 100%;
-  font-family: Microsoft YaHei,Arial,Helvetica,Tahoma,sans-serif;
+  font-family: Microsoft YaHei, Arial, Helvetica, Tahoma, sans-serif;
+  -webkit-font-smoothing: antialiased;
   font-size: 13px;
   background-color: #fff;
-  line-height: 1.5;
 }
 
 /* 图片默认自适应 */

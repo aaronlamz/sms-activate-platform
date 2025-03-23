@@ -1,15 +1,5 @@
 <template>
   <div class="register-page">
-    <!-- 顶部蓝色Banner，和登录页面保持一致 -->
-    <header class="header-banner">
-      <div class="banner-content">
-        <!-- 顶部图标，可替换为你的实际图标 -->
-        <img class="icon" src="https://via.placeholder.com/60x60.png?text=Shield" alt="icon" />
-        <h1>闪电接码</h1>
-        <p>接码短信平台集合实卡短信接码</p>
-      </div>
-    </header>
-
     <!-- 注册卡片 -->
     <div class="form-container">
       <el-card class="register-card">
@@ -82,34 +72,7 @@ export default {
 
 <style scoped>
 .register-page {
-  background-color: #f5f5f5;
   min-height: 100vh;
-}
-
-/* 顶部蓝色Banner (同Login) */
-.header-banner {
-  background: #0052d9;
-  color: #fff;
-  text-align: center;
-  padding: 40px 20px;
-}
-.banner-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.icon {
-  width: 60px;
-  height: 60px;
-  margin-bottom: 10px;
-}
-.banner-content h1 {
-  margin: 0;
-  font-size: 24px;
-}
-.banner-content p {
-  margin: 8px 0 0;
-  font-size: 14px;
 }
 
 /* 注册卡片 */

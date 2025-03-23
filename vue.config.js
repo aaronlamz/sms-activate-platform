@@ -11,4 +11,10 @@ module.exports = defineConfig({
       },
     },
   },
+  chainWebpack: (config) => {
+    config.plugin('html').tap((args) => {
+      args[0].title = '短信激活平台' // 设置页面标题
+      return args
+    })
+  },
 })
