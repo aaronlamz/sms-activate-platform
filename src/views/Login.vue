@@ -201,14 +201,23 @@ export default {
   text-align: center;
   color: #606266;
   font-size: 14px;
+  touch-action: manipulation;
 }
 .switch-mode a {
   color: #409eff;
   cursor: pointer;
   margin-left: 5px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: inline-block;
 }
 .switch-mode a:hover {
   color: #66b1ff;
+  background-color: rgba(64, 158, 255, 0.1);
+}
+.switch-mode a:active {
+  background-color: rgba(64, 158, 255, 0.2);
 }
 
 /* 调整 Element UI 的默认样式 */
