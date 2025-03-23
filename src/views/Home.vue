@@ -23,25 +23,29 @@
         <!-- 接码 Tab -->
         <el-tab-pane label="接码" name="jiema">
           <div class="tab-content">
-            <el-form :model="jiemaForm" label-width="0">
-              <div class="form-row">
-                <div class="form-item">
-                  <span class="label">运营商：</span>
-                  <el-select v-model="jiemaForm.carrier" placeholder="请选择运营商">
-                    <el-option label="国内接码" value="国内接码"></el-option>
-                    <el-option label="海外接码" value="海外接码"></el-option>
-                  </el-select>
-                </div>
-                <div class="form-item">
-                  <span class="label">归属地：</span>
-                  <el-select v-model="jiemaForm.location" placeholder="不限">
-                    <el-option label="不限" value="不限"></el-option>
-                    <el-option label="北京" value="北京"></el-option>
-                    <el-option label="上海" value="上海"></el-option>
-                  </el-select>
-                </div>
-              </div>
-
+            <el-form :model="jiemaForm" class="jiema-form">
+              <el-row :gutter="20" class="jiema-form-row">
+                <el-col :span="8">
+                  <div class="form-item">
+                    <span class="label">运营商：</span>
+                    <el-select v-model="jiemaForm.carrier" placeholder="请选择运营商">
+                      <el-option label="国内接码" value="国内接码"></el-option>
+                      <el-option label="海外接码" value="海外接码"></el-option>
+                    </el-select>
+                  </div>
+                </el-col>
+                <el-col :span="8">
+                  <div class="form-item">
+                    <span class="label">归属地：</span>
+                    <el-select v-model="jiemaForm.location" placeholder="不限">
+                      <el-option label="不限" value="不限"></el-option>
+                      <el-option label="北京" value="北京"></el-option>
+                      <el-option label="上海" value="上海"></el-option>
+                    </el-select>
+                  </div>
+                </el-col>
+              </el-row>
+              <div class="border-bottom"></div>
               <div class="form-item">
                 <span class="label">项目类：</span>
                 <el-select v-model="jiemaForm.projectType" placeholder="请选择项目">
@@ -49,7 +53,7 @@
                   <el-option label="某业务1" value="type1"></el-option>
                 </el-select>
               </div>
-
+              <div class="border-bottom"></div>
               <div class="form-item">
                 <span class="label">指定号码：</span>
                 <el-input
@@ -58,7 +62,7 @@
                 />
               </div>
             </el-form>
-
+            <div class="border-bottom"></div>
             <!-- 操作按钮组 -->
             <div class="btn-group">
               <el-button type="primary" plain @click="onGetNumber">获取号码</el-button>
@@ -71,23 +75,17 @@
               <div class="result-item">
                 <span class="label">手机号码：</span>
                 <span class="value">{{ jiemaResult.phone || '请先取号' }}</span>
-                <el-button type="primary" size="mini" @click="onCopy(jiemaResult.phone)"
-                  >复制</el-button
-                >
+                <el-button type="primary" @click="onCopy(jiemaResult.phone)">复制</el-button>
               </div>
               <div class="result-item">
                 <span class="label">验证码：</span>
                 <span class="value">{{ jiemaResult.code || '等待获取验证码' }}</span>
-                <el-button type="primary" size="mini" @click="onCopy(jiemaResult.code)"
-                  >复制</el-button
-                >
+                <el-button type="primary" @click="onCopy(jiemaResult.code)">复制</el-button>
               </div>
               <div class="result-item">
                 <span class="label">短信内容：</span>
                 <span class="value">{{ jiemaResult.smsContent || '等待获取短信内容' }}</span>
-                <el-button type="primary" size="mini" @click="onCopy(jiemaResult.smsContent)"
-                  >复制</el-button
-                >
+                <el-button type="primary" @click="onCopy(jiemaResult.smsContent)">复制</el-button>
               </div>
             </div>
           </div>
@@ -508,41 +506,59 @@ export default {
 }
 
 /* 表单样式 */
-.form-row {
-  display: flex;
-  gap: 10px;
+.jiema-form {
+  padding-bottom: 15px;
   margin-bottom: 15px;
 }
-.form-item {
-  flex: 1;
+.jiema-form .form-item {
   display: flex;
   align-items: center;
   margin-bottom: 15px;
 }
-.form-item .label {
-  min-width: 70px;
+.jiema-form .form-item .label {
+  width: 70px;
   color: #606266;
   font-size: 14px;
 }
-:deep(.el-select) {
+.jiema-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding-top: 24px;
+}
+
+.border-bottom {
+  display: block;
+  height: 1px;
+  width: 100%;
+  margin: 24px 0;
+  background-color: #ebeef5;
+}
+
+/* 只限定运营商和归属地的选择框宽度 */
+.jiema-form .form-item:first-child :deep(.el-select),
+.jiema-form .form-item:nth-child(2) :deep(.el-select) {
+  width: 220px;
+}
+/* 其他输入框自适应 */
+.jiema-form :deep(.el-select),
+.jiema-form :deep(.el-input) {
   flex: 1;
 }
-:deep(.el-input) {
-  flex: 1;
-}
-:deep(.el-input__inner) {
-  height: 32px;
-  line-height: 32px;
-  padding: 0 12px;
-  border-radius: 4px;
-  border-color: #dcdfe6;
-  font-size: 13px;
-}
-:deep(.el-input__inner):hover {
-  border-color: #c0c4cc;
-}
-:deep(.el-input__inner):focus {
-  border-color: #409eff;
+
+/* 移动端适配 */
+@media screen and (max-width: 768px) {
+  .jiema-form-row {
+    padding-top: 12px;
+  }
+  .jiema-form-row :deep(.el-col-8) {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+  .jiema-form .form-item:first-child :deep(.el-select),
+  .jiema-form .form-item:nth-child(2) :deep(.el-select) {
+    width: 100%;
+  }
 }
 
 /* 按钮组 */
@@ -571,7 +587,6 @@ export default {
 
 /* 结果列表 */
 .result-list {
-  border-top: 1px solid #ebeef5;
   padding-top: 15px;
 }
 .result-item {
@@ -580,9 +595,8 @@ export default {
   padding: 10px 0;
   border-bottom: 1px solid #ebeef5;
 }
-
 .result-item .label {
-  min-width: 70px;
+  width: 70px;
   color: #606266;
   font-size: 14px;
 }
@@ -591,10 +605,6 @@ export default {
   color: #909399;
   font-size: 14px;
   margin-right: 10px;
-}
-:deep(.el-button--mini) {
-  padding: 7px 12px;
-  font-size: 12px;
 }
 
 /* 调整Element UI组件样式 */

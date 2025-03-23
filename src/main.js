@@ -6,7 +6,9 @@ import 'element-ui/lib/theme-chalk/index.css'
 import '@/assets/styles/reset.css'
 
 Vue.config.productionTip = false
-Vue.use(ElementUI)
+Vue.use(ElementUI, {
+  size: 'medium',
+})
 
 new Vue({
   router,
