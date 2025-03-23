@@ -3,9 +3,11 @@
     <!-- 登录卡片 -->
     <div class="form-container">
       <el-card class="login-card" shadow="never">
+        <!-- 登录表单 -->
         <el-form
+          v-show="isLoginMode"
           :model="loginForm"
-          :rules="rules"
+          :rules="loginRules"
           ref="loginForm"
           label-width="60px"
           @submit.native.prevent="handleLogin"
@@ -22,18 +24,53 @@
               show-password
             />
           </el-form-item>
-          <el-form-item>
+          <div class="remember-box">
             <el-checkbox v-model="loginForm.remember">
               记住登录状态
               <small style="color: #999">(在公共设备上请勿勾选)</small>
             </el-checkbox>
+          </div>
+          <el-button type="primary" class="submit-btn" @click="handleLogin">登录</el-button>
+          <div class="switch-mode">
+            <span>还没有账号？</span>
+            <a @click="switchMode">立即注册</a>
+          </div>
+        </el-form>
+
+        <!-- 注册表单 -->
+        <el-form
+          v-show="!isLoginMode"
+          :model="registerForm"
+          :rules="registerRules"
+          ref="registerForm"
+          label-width="90px"
+          @submit.native.prevent="handleRegister"
+        >
+          <el-form-item label="登录账号" prop="username">
+            <el-input v-model="registerForm.username" placeholder="登录账号" clearable />
           </el-form-item>
-          <el-form-item style="margin-bottom: 10px">
-            <el-button type="primary" style="width: 100%" @click="handleLogin">登录</el-button>
+          <el-form-item label="登录密码" prop="password">
+            <el-input
+              v-model="registerForm.password"
+              type="password"
+              placeholder="登录密码"
+              clearable
+              show-password
+            />
           </el-form-item>
-          <!-- 注册账号链接 -->
-          <div class="bottom-link">
-            <router-link to="/register" class="register-link">注册账号</router-link>
+          <el-form-item label="再次输入" prop="password2">
+            <el-input
+              v-model="registerForm.password2"
+              type="password"
+              placeholder="再次输入"
+              clearable
+              show-password
+            />
+          </el-form-item>
+          <el-button type="primary" class="submit-btn" @click="handleRegister">注册</el-button>
+          <div class="switch-mode">
+            <span>已有账号？</span>
+            <a @click="switchMode">立即登录</a>
           </div>
         </el-form>
       </el-card>
@@ -47,19 +84,48 @@ import { loginApi } from '@/api/user'
 export default {
   name: 'Login',
   data() {
+    const validatePass2 = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请再次输入密码'))
+      } else if (value !== this.registerForm.password) {
+        callback(new Error('两次输入密码不一致'))
+      } else {
+        callback()
+      }
+    }
     return {
+      isLoginMode: true,
       loginForm: {
         username: '',
         password: '',
         remember: false,
       },
-      rules: {
+      registerForm: {
+        username: '',
+        password: '',
+        password2: '',
+      },
+      loginRules: {
         username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+      },
+      registerRules: {
+        username: [{ required: true, message: '请输入登录账号', trigger: 'blur' }],
+        password: [{ required: true, message: '请输入登录密码', trigger: 'blur' }],
+        password2: [{ required: true, validator: validatePass2, trigger: 'blur' }],
       },
     }
   },
   methods: {
+    switchMode() {
+      this.isLoginMode = !this.isLoginMode
+      // 切换时重置表单
+      if (this.isLoginMode) {
+        this.$refs.loginForm?.resetFields()
+      } else {
+        this.$refs.registerForm?.resetFields()
+      }
+    },
     async handleLogin() {
       try {
         await this.$refs.loginForm.validate()
@@ -78,22 +144,39 @@ export default {
         console.error('登录错误：', error)
       }
     },
+    async handleRegister() {
+      try {
+        await this.$refs.registerForm.validate()
+        // TODO: 调用注册接口
+        this.$message.success('注册成功')
+        this.isLoginMode = true // 注册成功后切换到登录
+      } catch (error) {
+        if (error === false) {
+          // 表单验证失败
+          return
+        }
+        console.error('注册错误：', error)
+      }
+    },
   },
 }
 </script>
 
 <style scoped>
-/* .login-page { */
-/* min-height: calc(100vh - 260px);
-  padding-top: 20px;
-  background-color: #f5f5f5; */
-/* } */
-
-/* 登录卡片 */
+/* 登录注册卡片 */
 .form-container {
-  width: 90%;
+  width: 400px;
   margin: 0 auto;
   margin-top: 50px;
+  transition: width 0.3s ease;
+}
+
+@media screen and (max-width: 1000px) {
+  .form-container {
+    width: 90%;
+    margin: 0 auto;
+    margin-top: 50px;
+  }
 }
 .login-card {
   background: #fff;
@@ -103,16 +186,28 @@ export default {
 .login-card :deep(.el-card__body) {
   padding: 30px 20px;
 }
-.bottom-link {
-  text-align: center;
-  margin-top: 15px;
+.remember-box {
+  margin-bottom: 22px;
+  margin-left: 15px;
 }
-.register-link {
-  color: #409eff;
-  text-decoration: none;
+.submit-btn {
+  width: 100%;
+  height: 40px;
+  font-size: 14px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+.switch-mode {
+  text-align: center;
+  color: #606266;
   font-size: 14px;
 }
-.register-link:hover {
+.switch-mode a {
+  color: #409eff;
+  cursor: pointer;
+  margin-left: 5px;
+}
+.switch-mode a:hover {
   color: #66b1ff;
 }
 
@@ -144,13 +239,7 @@ export default {
   padding-top: 4px;
 }
 :deep(.el-checkbox) {
-  margin-left: 60px;
   color: #606266;
   font-size: 14px;
-}
-:deep(.el-button--primary) {
-  height: 40px;
-  font-size: 14px;
-  border-radius: 4px;
 }
 </style>
