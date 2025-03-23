@@ -45,6 +45,7 @@
 </template>
 
 <script>
+// 废弃注册页面，使用登录页面切换注册模块
 export default {
   name: 'Register',
   data() {
