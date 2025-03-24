@@ -296,24 +296,26 @@
         <!-- 充值 Tab -->
         <el-tab-pane label="充值" name="chongzhi">
           <div class="tab-content">
-            <p>今日USD汇率1U等于7.3 RMB平台余额</p>
+            <p>今日USDT汇率1U等于7.3 RMB平台余额</p>
             <p>充值金额/价格关系：</p>
-            <ul>
-              <li>单次充值10 USD: 平台余额73</li>
-              <li>单次充值20 USD: 赠送百分之1</li>
-              <li>单次充值50 USD: 赠送百分之2</li>
-              <li>单次充值100 USD: 赠送百分之5</li>
-              <li>单次充值500 USD: 赠送百分之10</li>
+            <ul class="recharge-list">
+              <li @click="selectRechargeAmount(10)">单次充值10 USDT：平台余额73</li>
+              <li @click="selectRechargeAmount(20)">单次充值20 USDT：赠送百分之1</li>
+              <li @click="selectRechargeAmount(50)">单次充值50 USDT：赠送百分之2</li>
+              <li @click="selectRechargeAmount(100)">单次充值100 USDT：赠送百分之5</li>
+              <li @click="selectRechargeAmount(500)">单次充值500 USDT：赠送百分之10</li>
             </ul>
-            <p>仅限单次充值赠送，充值后自动到账。</p>
+            <p>仅限单次充值赠送，充值完毕平台自动赠送到平台余额。</p>
 
-            <el-form label-width="90px">
-              <el-form-item label="充值金额：">
+            <div class="recharge-input">
+              <div class="input-wrapper">
+                <span class="label">充值金额：</span>
                 <el-input v-model="chongzhiForm.amount" placeholder="请先输入充值金额" />
-                <span>USD</span>
-              </el-form-item>
-            </el-form>
-            <el-button type="primary" @click="onRecharge">充值</el-button>
+                <span>USDT</span>
+              </div>
+            </div>
+
+            <el-button type="primary" class="recharge-button" @click="onRecharge">充值</el-button>
           </div>
         </el-tab-pane>
 
@@ -470,6 +472,10 @@ export default {
     },
 
     // 充值 Tab
+    selectRechargeAmount(amount) {
+      this.chongzhiForm.amount = amount
+      this.$message.success(`已选择充值金额：${amount} USDT`)
+    },
     onRecharge() {
       if (!this.chongzhiForm.amount) {
         this.$message.error('请先输入充值金额')
@@ -940,5 +946,49 @@ export default {
     flex: 1 1 calc(50% - 10px);
     min-width: 0;
   }
+}
+
+/* 充值页面样式 */
+#pane-chongzhi p {
+  text-align: center;
+}
+.recharge-list {
+  list-style: none;
+  padding: 0;
+  text-align: center;
+}
+
+.recharge-list li {
+  padding: 10px 0;
+  cursor: pointer;
+}
+
+.recharge-list li:hover {
+  color: #409eff;
+}
+
+.recharge-input {
+  margin: 20px 0;
+}
+
+.recharge-input .input-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.recharge-input .label {
+  min-width: 90px;
+}
+
+.recharge-input .el-input {
+  flex: 1;
+  margin: 0 10px;
+}
+
+.recharge-button {
+  width: 100%;
+  height: 44px;
+  font-size: 16px;
+  margin-top: 20px;
 }
 </style>
