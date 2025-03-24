@@ -115,55 +115,82 @@
         <!-- 发短信 Tab -->
         <el-tab-pane label="发短信" name="faduanxin">
           <div class="tab-content">
-            <el-form label-width="90px">
-              <el-form-item label="运营商：">
-                <el-select v-model="faduanxinForm.carrier" placeholder="请选择运营商">
-                  <el-option label="国内接码" value="国内接码"></el-option>
-                  <el-option label="海外接码" value="海外接码"></el-option>
-                </el-select>
-                <span style="margin-left: 20px">归属地：</span>
-                <el-select v-model="faduanxinForm.location" placeholder="不限" style="width: 120px">
-                  <el-option label="不限" value="不限"></el-option>
-                  <el-option label="北京" value="北京"></el-option>
-                  <el-option label="上海" value="上海"></el-option>
-                </el-select>
-              </el-form-item>
-
-              <el-form-item label="项目类：">
-                <el-select v-model="faduanxinForm.projectType" placeholder="请选择项目">
-                  <el-option label="全业务(任何项目都能接)----0.60 USD" value="all"></el-option>
-                  <el-option label="某业务1" value="type1"></el-option>
-                </el-select>
-              </el-form-item>
-
-              <el-form-item label="指定号码：">
-                <el-input v-model="faduanxinForm.phonePrefix" placeholder="例: 152, 188" />
-              </el-form-item>
+            <el-form :model="faduanxinForm" class="jiema-form">
+              <el-row :gutter="24" class="jiema-form-row">
+                <el-col :span="8">
+                  <div class="form-item">
+                    <span class="label">运营商：</span>
+                    <el-select v-model="faduanxinForm.carrier" placeholder="请选择运营商">
+                      <el-option label="国内接码" value="国内接码"></el-option>
+                      <el-option label="海外接码" value="海外接码"></el-option>
+                    </el-select>
+                  </div>
+                </el-col>
+                <el-col :span="8">
+                  <div class="form-item">
+                    <span class="label">归属地：</span>
+                    <el-select v-model="faduanxinForm.location" placeholder="不限">
+                      <el-option label="不限" value="不限"></el-option>
+                      <el-option label="北京" value="北京"></el-option>
+                      <el-option label="上海" value="上海"></el-option>
+                    </el-select>
+                  </div>
+                </el-col>
+              </el-row>
+              <el-row :gutter="24" class="jiema-form-row row-pj">
+                <el-col :span="16">
+                  <div class="form-item">
+                    <span class="label">项目类：</span>
+                    <el-select v-model="faduanxinForm.projectType" placeholder="请选择项目">
+                      <el-option label="全业务(任何项目都能接)----0.60 USD" value="all"></el-option>
+                      <el-option label="某业务1" value="type1"></el-option>
+                    </el-select>
+                  </div>
+                </el-col>
+              </el-row>
+              <el-row :gutter="24" class="jiema-form-row spcial-number">
+                <el-col :span="16">
+                  <div class="form-item">
+                    <span class="label">指定号码：</span>
+                    <el-input
+                      v-model="faduanxinForm.phonePrefix"
+                      placeholder="输入号码或号段前3位置（例：152，188）"
+                    />
+                  </div>
+                </el-col>
+              </el-row>
             </el-form>
+            <div class="border-bottom"></div>
+            <!-- 操作按钮组 -->
             <div class="btn-group">
-              <el-button type="primary" @click="onGetNumberSMS">获取号码</el-button>
-              <el-button @click="onBlockNumberSMS">拉黑号码</el-button>
-              <el-button type="danger" @click="onReleaseNumberSMS">释放号码</el-button>
+              <el-button type="primary" plain @click="onGetNumberSMS">获取号码</el-button>
+              <el-button type="primary" plain @click="onBlockNumberSMS">拉黑号码</el-button>
+              <el-button type="primary" plain @click="onReleaseNumberSMS">释放号码</el-button>
             </div>
 
-            <!-- 发短信额外功能 -->
-            <div class="result-box">
-              <el-form label-width="90px">
-                <el-form-item label="手机号码：">
-                  <span>{{ faduanxinResult.phone || '请先取号' }}</span>
-                  <el-button type="primary" size="mini" @click="onCopy(faduanxinResult.phone)"
-                    >复制</el-button
-                  >
-                </el-form-item>
-                <el-form-item label="发送号码：">
+            <!-- 结果展示 -->
+            <div class="result-list">
+              <div class="result-item">
+                <span class="label">手机号码：</span>
+                <span class="value">{{ faduanxinResult.phone || '请先取号' }}</span>
+                <el-button type="primary" size="mini" @click="onCopy(faduanxinResult.phone)"
+                  >复制</el-button
+                >
+              </div>
+              <div class="result-item">
+                <span class="label">发送号码：</span>
+                <span class="value">
                   <el-input v-model="faduanxinForm.sendTo" placeholder="请输入收短信号码" />
-                  <el-button size="mini" @click="onPasteNumber">粘贴</el-button>
-                </el-form-item>
-                <el-form-item label="短信内容：">
+                </span>
+                <el-button type="primary" size="mini" @click="onPasteNumber">粘贴</el-button>
+              </div>
+              <div class="result-item">
+                <span class="label">短信内容：</span>
+                <span class="value">
                   <el-input v-model="faduanxinForm.smsText" placeholder="请输入短信内容" />
-                  <el-button type="primary" size="mini" @click="onSendSMS">发送</el-button>
-                </el-form-item>
-              </el-form>
+                </span>
+                <el-button type="primary" size="mini" @click="onSendSMS">发送</el-button>
+              </div>
             </div>
           </div>
         </el-tab-pane>
@@ -670,9 +697,7 @@ export default {
   border-bottom: 1px solid #ebeef5;
   width: 100%;
 }
-.result-item:last-child {
-  border-bottom: none;
-}
+
 .result-item .label {
   width: 70px;
   color: #606266;
@@ -693,5 +718,59 @@ export default {
   font-size: 14px;
   height: 40px;
   line-height: 40px;
+}
+
+/* 发短信模块特定样式 */
+.result-list .result-item .value .el-input {
+  width: 100%;
+  margin-right: 10px;
+}
+
+.result-list .result-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.result-list .result-item .label {
+  min-width: 85px;
+  font-size: 14px;
+  color: #606266;
+  text-align: right;
+  padding-right: 12px;
+}
+
+.result-list .result-item .value {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.result-list .result-item .el-button {
+  margin-left: 10px;
+}
+
+/* 移动端适配 */
+@media screen and (max-width: 768px) {
+  .result-list .result-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .result-list .result-item .label {
+    text-align: left;
+    margin-bottom: 8px;
+  }
+
+  .result-list .result-item .value {
+    margin-bottom: 8px;
+  }
+
+  .result-list .result-item .el-button {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 8px;
+  }
 }
 </style>
