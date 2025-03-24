@@ -23,6 +23,12 @@ yarn serve
 
 http://localhost:8080
 
+## 页面
+
+- 首页: http://localhost:8080/
+- 登录: http://localhost:8080/login
+- 充值页面: http://localhost:8080/payment/index.html
+
 ### 打包
 
 ```shell

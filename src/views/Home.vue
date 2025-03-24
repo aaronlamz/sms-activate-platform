@@ -434,8 +434,8 @@ export default {
         this.$message.error('请先输入充值金额')
         return
       }
-      this.$message.success(`充值${this.chongzhiForm.amount} USD成功！`)
-      this.chongzhiForm.amount = ''
+      // 跳转到支付页面，并传递充值金额参数
+      window.location.href = `/payment/index.html?price=${this.chongzhiForm.amount}`
     },
 
     // 我的 Tab
