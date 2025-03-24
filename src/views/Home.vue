@@ -198,84 +198,98 @@
         <!-- 打电话 Tab -->
         <el-tab-pane label="打电话" name="dadianhua">
           <div class="tab-content">
-            <!-- 使用 el-timeline 将各步骤分成多个节点 -->
-            <el-timeline>
-              <!-- 第一步：选择 虚拟号/实体号 -->
-              <el-timeline-item>
-                <!-- 时间戳标题，可自定义文字 -->
-                <div class="el-timeline-item__timestamp is-top">虚拟号/实体号</div>
-                <!-- 内容区 -->
-                <div class="el-timeline-item__content">
-                  <el-card class="is-always-shadow">
-                    <div class="el-card__body">
-                      <el-radio-group v-model="callForm.type">
-                        <el-radio label="虚拟号">虚拟号</el-radio>
-                        <el-radio label="实体号">实体号</el-radio>
-                      </el-radio-group>
+            <!-- 虚拟号/实体号 (保持卡片样式) -->
+            <div class="card-wrapper">
+              <div class="call-setting-group">
+                <div class="setting-content">
+                  <div class="radio-group">
+                    <div
+                      class="radio-item-noarea"
+                      :class="{ active: callForm.type === '虚拟号' }"
+                      @click="callForm.type = '虚拟号'"
+                    >
+                      <div class="radio-circle">
+                        <div class="radio-inner" v-if="callForm.type === '虚拟号'"></div>
+                      </div>
+                      <span class="radio-label">虚拟号</span>
                     </div>
-                  </el-card>
-                </div>
-              </el-timeline-item>
-
-              <!-- 第二步：号码归属地 -->
-              <el-timeline-item>
-                <div class="el-timeline-item__timestamp is-top">号码归属地</div>
-                <div class="el-timeline-item__content">
-                  <el-card class="is-always-shadow">
-                    <div class="el-card__body">
-                      <el-select
-                        v-model="callForm.location"
-                        placeholder="CN/中国 +86"
-                        style="width: 80%"
-                      >
-                        <el-option label="CN/中国 +86" value="CN+86"></el-option>
-                        <el-option label="US/美国 +1" value="US+1"></el-option>
-                        <el-option label="HK/香港 +852" value="HK+852"></el-option>
-                        <!-- ...其他选项 -->
-                      </el-select>
+                    <div
+                      class="radio-item-noarea"
+                      :class="{ active: callForm.type === '实体号' }"
+                      @click="callForm.type = '实体号'"
+                    >
+                      <div class="radio-circle">
+                        <div class="radio-inner" v-if="callForm.type === '实体号'"></div>
+                      </div>
+                      <span class="radio-label">实体号</span>
                     </div>
-                  </el-card>
+                  </div>
                 </div>
-              </el-timeline-item>
+              </div>
 
-              <!-- 第三步：租期 -->
-              <el-timeline-item>
-                <div class="el-timeline-item__timestamp is-top">租期</div>
-                <div class="el-timeline-item__content">
-                  <el-card class="is-always-shadow">
-                    <div class="el-card__body">
-                      <el-radio-group v-model="callForm.rentPeriod">
-                        <el-radio label="日租">日租</el-radio>
-                        <el-radio label="周租">周租</el-radio>
-                        <el-radio label="月租">月租</el-radio>
-                        <el-radio label="季租">季租</el-radio>
-                      </el-radio-group>
-                    </div>
-                  </el-card>
-                </div>
-              </el-timeline-item>
+              <!-- 其他行恢复时间线样式 -->
+              <el-timeline>
+                <!-- 号码归属地 -->
+                <el-timeline-item>
+                  <div class="el-timeline-item__timestamp is-top">号码归属地</div>
+                  <div class="el-timeline-item__content">
+                    <el-card class="is-always-shadow timeline-card">
+                      <div class="el-card__body">
+                        <el-select
+                          v-model="callForm.location"
+                          placeholder="CN/中国 +86"
+                          style="width: 80%"
+                        >
+                          <el-option label="CN/中国 +86" value="CN+86"></el-option>
+                          <el-option label="US/美国 +1" value="US+1"></el-option>
+                          <el-option label="HK/香港 +852" value="HK+852"></el-option>
+                        </el-select>
+                      </div>
+                    </el-card>
+                  </div>
+                </el-timeline-item>
 
-              <!-- 第四步：套餐 -->
-              <el-timeline-item>
-                <div class="el-timeline-item__timestamp is-top">套餐</div>
-                <div class="el-timeline-item__content">
-                  <el-card class="is-always-shadow">
-                    <div class="el-card__body">
-                      <el-radio-group v-model="callForm.packageType">
-                        <el-radio label="隐私电话">隐私电话</el-radio>
-                        <el-radio label="隐私短信">隐私短信</el-radio>
-                      </el-radio-group>
-                    </div>
-                  </el-card>
-                </div>
-              </el-timeline-item>
-            </el-timeline>
+                <!-- 租期 -->
+                <el-timeline-item>
+                  <div class="el-timeline-item__timestamp is-top">租期</div>
+                  <div class="el-timeline-item__content">
+                    <el-card class="is-always-shadow timeline-card">
+                      <div class="el-card__body">
+                        <el-radio-group v-model="callForm.rentPeriod">
+                          <el-radio class="radio-item" label="日租">日租</el-radio>
+                          <el-radio class="radio-item" label="周租">周租</el-radio>
+                          <el-radio class="radio-item" label="月租">月租</el-radio>
+                          <el-radio class="radio-item" label="季租">季租</el-radio>
+                        </el-radio-group>
+                      </div>
+                    </el-card>
+                  </div>
+                </el-timeline-item>
 
-            <!-- 底部：费用 + 购买按钮 -->
-            <p class="estimate-fee">预计费用：{{ callForm.estimatedFee }} USD</p>
-            <el-button type="primary" @click="onBuyNumber" style="width: 100%">
-              立即购买
-            </el-button>
+                <!-- 套餐 -->
+                <el-timeline-item>
+                  <div class="el-timeline-item__timestamp is-top">套餐</div>
+                  <div class="el-timeline-item__content">
+                    <el-card class="is-always-shadow timeline-card">
+                      <div class="el-card__body">
+                        <el-radio-group v-model="callForm.packageType">
+                          <el-radio class="radio-item" label="隐私电话">隐私电话</el-radio>
+                          <el-radio class="radio-item" label="隐私短信">隐私短信</el-radio>
+                        </el-radio-group>
+                      </div>
+                    </el-card>
+                  </div>
+                </el-timeline-item>
+              </el-timeline>
+
+              <!-- 底部：费用 + 购买按钮 -->
+              <div class="call-footer">
+                <p class="fee-text">预计费用：{{ callForm.estimatedFee }} USDT</p>
+                <el-button type="primary" class="buy-button" @click="onBuyNumber"
+                  >立即购买</el-button
+                >
+              </div>
+            </div>
           </div>
         </el-tab-pane>
 
@@ -771,6 +785,160 @@ export default {
     width: 100%;
     margin-left: 0;
     margin-top: 8px;
+  }
+}
+
+/* 打电话模块样式 */
+.call-setting-group {
+  background-color: #fff;
+  border-bottom: 1px solid #ebeef5;
+  margin-bottom: 15px;
+}
+
+.timeline-card {
+  border: 1px solid #e4e7ed;
+}
+
+.setting-title {
+  color: #666;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.setting-content {
+  display: flex;
+  align-items: center;
+}
+
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  width: 100%;
+}
+
+.radio-group.rent-period {
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+.radio-item-noarea {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px 10px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+  background: none;
+}
+.radio-item-noarea .active {
+  color: #409eff;
+  background-color: unset;
+}
+.radio-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px 12px 10px;
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 100px;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+}
+
+.radio-item.active {
+  border-color: #409eff;
+  background-color: #f0f7ff;
+}
+
+.radio-circle {
+  width: 18px;
+  height: 18px;
+  border: 1px solid #dcdfe6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+}
+
+.radio-item.active .radio-circle {
+  border-color: #409eff;
+}
+
+.radio-inner {
+  width: 10px;
+  height: 10px;
+  background-color: #409eff;
+  border-radius: 50%;
+}
+
+.radio-label {
+  font-size: 20px;
+  color: #606266;
+  font-weight: 500;
+}
+
+.radio-item.active .radio-label {
+  color: #409eff;
+}
+.radio-item-noarea.active .radio-label {
+  color: #409eff;
+}
+
+.area-select {
+  width: 100%;
+}
+
+.call-footer {
+  margin-top: 25px;
+}
+
+.fee-text {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.buy-button {
+  width: 100%;
+  height: 44px;
+  font-size: 16px;
+  border-radius: 4px;
+}
+
+.card-wrapper {
+  border-radius: 4px;
+  border: 1px solid #ebeef5;
+  background-color: #fff;
+  overflow: hidden;
+  color: #303133;
+  transition: 0.3s;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.el-radio-group {
+  display: flex;
+}
+
+@media screen and (max-width: 768px) {
+  .radio-label {
+    font-size: 14px;
+  }
+  .el-radio-group {
+    display: block;
+  }
+  .radio-group.rent-period {
+    flex-wrap: wrap;
+  }
+
+  .radio-item {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 0;
   }
 }
 </style>
