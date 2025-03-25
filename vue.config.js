@@ -1,6 +1,6 @@
 const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
-  publicPath: '/test', // 部署目录路径，根据实际情况修改
+  publicPath: '/', // 部署目录路径，根据实际部署的目录修改
   transpileDependencies: true,
   devServer: {
     open: true, // 自动打开浏览器
