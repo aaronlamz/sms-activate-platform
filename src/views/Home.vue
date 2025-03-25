@@ -479,12 +479,35 @@ export default {
       this.$message.success(`已选择充值金额：${amount} USDT`)
     },
     onRecharge() {
+      // 判断用户是否登录
+      if (!localStorage.getItem('smsToken')) {
+        this.$confirm('您还未登录，需要先登录后才能充值，是否前往登录页面？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        })
+          .then(() => {
+            // 用户点击确认，跳转到登录页面
+            this.$router.push('/login')
+          })
+          .catch(() => {
+            // 用户点击取消，停留在当前页面
+            this.$message({
+              type: 'info',
+              message: '已取消跳转',
+            })
+          })
+        return
+      }
+
       if (!this.chongzhiForm.amount) {
         this.$message.error('请先输入充值金额')
         return
       }
+      // 使用process.env.BASE_URL获取publicPath
+      const baseUrl = process.env.BASE_URL || '/'
       // 跳转到支付页面，并传递充值金额参数
-      window.location.href = `/payment/index.html?price=${this.chongzhiForm.amount}`
+      window.location.href = `${baseUrl}payment/index.html?price=${this.chongzhiForm.amount}`
     },
 
     // 我的 Tab
