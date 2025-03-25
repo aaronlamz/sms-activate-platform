@@ -134,7 +134,7 @@ export default {
           password: this.loginForm.password,
         })
         this.$message.success('登录成功')
-        localStorage.setItem('token', res.token)
+        localStorage.setItem('smsToken', res.token)
         this.$router.push('/')
       } catch (error) {
         if (error === false) {
