@@ -1,6 +1,4 @@
-# sms-activate-platform
-
-接码短信平台
+# 接码短信平台
 
 ### 环境要求
 
@@ -13,24 +11,30 @@
 yarn install
 ```
 
-### 启动
+### 启动项目
 
 ```shell
 yarn serve
 ```
 
-### 访问
+### 本地访问
 
 http://localhost:8080
 
-## 页面
+## 页面结构
 
 - 首页: http://localhost:8080/
 - 登录: http://localhost:8080/login
 - 充值页面: http://localhost:8080/payment/index.html
 
-### 打包
+### 打包部署
 
 ```shell
 yarn build
+```
+
+将制品 dist 文件夹中的内容部署到服务器上即可
+
+```shell
+
 ```
