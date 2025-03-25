@@ -346,35 +346,55 @@
         <!-- 我的 Tab -->
         <el-tab-pane label="我的" name="wode">
           <div class="tab-content">
-            <el-card class="user-card">
-              <div class="user-info">
-                <img src="https://via.placeholder.com/60" alt="avatar" class="avatar" />
-                <div class="user-text">
-                  <p class="username">{{ userInfo.username }}</p>
-                  <span v-if="userInfo.vip" class="vip-badge">VIP</span>
+            <div class="user-info-wrapper">
+              <el-card class="user-card">
+                <div class="user-info">
+                  <img src="@/assets/imgs/user.png" alt="avatar" class="avatar" />
+                  <div class="user-text">
+                    <p class="username">{{ userInfo.username }}</p>
+                    <img
+                      v-if="userInfo.vip"
+                      src="@/assets/imgs/vip.png"
+                      alt="vip"
+                      class="vip"
+                      width="40px"
+                    />
+                  </div>
                 </div>
-              </div>
-            </el-card>
+              </el-card>
 
-            <el-card class="menu-card">
-              <ul class="menu-list">
-                <li>
-                  <span>账户余额</span>
-                  <span>{{ userInfo.balance }} RMB</span>
-                </li>
-                <li @click="onAPI">
-                  <span>API文档</span>
-                  <span>点击查看 ></span>
-                </li>
-                <li @click="onLogs">
-                  <span>使用记录</span>
-                  <span>点击查看 ></span>
-                </li>
-                <li @click="onLogout">
-                  <span>退出</span>
-                </li>
-              </ul>
-            </el-card>
+              <el-card class="menu-card">
+                <ul class="menu-list">
+                  <li>
+                    <div class="menu-item-left">
+                      <img src="@/assets/imgs/icon/icon-1.png" alt="balance" class="menu-icon" />
+                      <span>账户余额</span>
+                    </div>
+                    <span>{{ userInfo.balance }} RMB</span>
+                  </li>
+                  <li @click="onAPI">
+                    <div class="menu-item-left">
+                      <img src="@/assets/imgs/icon/icon-2.png" alt="api" class="menu-icon" />
+                      <span>API文档</span>
+                    </div>
+                    <span>点击查看 ></span>
+                  </li>
+                  <li @click="onLogs">
+                    <div class="menu-item-left">
+                      <img src="@/assets/imgs/icon/icon-3.png" alt="logs" class="menu-icon" />
+                      <span>使用记录</span>
+                    </div>
+                    <span>点击查看 ></span>
+                  </li>
+                  <li @click="onLogout">
+                    <div class="menu-item-left">
+                      <img src="@/assets/imgs/icon/icon-4.png" alt="logout" class="menu-icon" />
+                      <span>退出</span>
+                    </div>
+                  </li>
+                </ul>
+              </el-card>
+            </div>
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -551,8 +571,38 @@ export default {
       this.$message.info('查看使用记录...')
     },
     onLogout() {
+      // 清除登录状态
+      localStorage.removeItem('smsToken')
       this.$message.success('退出成功')
-      // 可跳转到登录：this.$router.push('/login')
+      // 跳转到登录页面
+      this.$router.push('/login')
+    },
+  },
+  watch: {
+    // 监听标签页切换
+    activeTab(newVal) {
+      if (newVal === 'wode') {
+        // 检查是否登录
+        if (!localStorage.getItem('smsToken')) {
+          this.$confirm('您还未登录，需要先登录才能查看个人信息，是否前往登录页面？', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          })
+            .then(() => {
+              // 用户点击确认，跳转到登录页面
+              this.$router.push('/login')
+            })
+            .catch(() => {
+              // 用户点击取消，切换回接码tab
+              this.activeTab = 'jiema'
+              this.$message({
+                type: 'info',
+                message: '已取消跳转',
+              })
+            })
+        }
+      }
     },
   },
   created() {
@@ -560,6 +610,11 @@ export default {
     this.checkMobileDevice()
     // 页面加载时显示公告弹窗
     this.showAnnouncement = true
+
+    // 如果直接访问"我的"页面，检查登录状态
+    if (this.activeTab === 'wode' && !localStorage.getItem('smsToken')) {
+      this.activeTab = 'jiema' // 未登录时默认显示接码页面
+    }
   },
 }
 </script>
@@ -663,6 +718,7 @@ export default {
   background: #fff;
   border-radius: 4px;
   padding: 15px;
+  min-height: 600px;
 }
 
 /* 表单样式 */
@@ -1161,6 +1217,129 @@ export default {
   .announcement-dialog >>> .el-button {
     padding: 8px 15px;
     font-size: 13px;
+  }
+}
+
+/* 用户信息卡片样式 */
+.user-info-wrapper {
+  width: 644px;
+  margin: 0 auto;
+  padding: 20px 10px;
+}
+.user-card {
+  margin-bottom: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+}
+
+.avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin-right: 15px;
+}
+
+.user-text {
+  display: flex;
+  align-items: center;
+}
+
+.username {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+  margin-right: 10px;
+}
+
+.vip-badge {
+  background: #8b4513;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* 菜单卡片样式 */
+.menu-card {
+  border-radius: 10px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  color: #333;
+  font-size: 14px;
+}
+
+.menu-list li:last-child {
+  border-bottom: none;
+}
+
+.menu-list li:hover {
+  background-color: #f5f7fa;
+}
+
+.menu-list li span:last-child {
+  color: #999;
+}
+
+.menu-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* 移动端适配 */
+@media screen and (max-width: 768px) {
+  .user-info-wrapper {
+    width: auto;
+    margin: 0 auto;
+    padding: 10px;
+  }
+  .user-card,
+  .menu-card {
+    margin: 10px;
+  }
+
+  .user-info {
+    padding: 12px;
+  }
+
+  .avatar {
+    width: 50px;
+    height: 50px;
+  }
+
+  .username {
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .menu-list li {
+    padding: 12px;
   }
 }
 </style>
