@@ -1,5 +1,27 @@
 <template>
   <div class="home-wrapper">
+    <!-- 平台公告弹窗 -->
+    <el-dialog
+      title="平台公告"
+      :visible.sync="showAnnouncement"
+      :width="isMobile ? '95%' : '400px'"
+      :fullscreen="false"
+      :show-close="true"
+      custom-class="announcement-dialog"
+      :append-to-body="true"
+      center
+    >
+      <div class="announcement-content">
+        <p>本网站接码号全部实卡接码,接码率可以达到百分之98,不成功不扣费,欢迎大家使用!</p>
+        <p>本平台对注册来的小号都是首卡,收到验证码则订单服务完成!</p>
+        <p>所有业务均来对接第三方平台！本站无自营业务!</p>
+        <p>全球接码短信平台,接码、短信代发一体化接码平台</p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="showAnnouncement = false">确认</el-button>
+      </span>
+    </el-dialog>
+
     <!-- 联系客服 & 常见问题区域 -->
     <div class="top-blocks">
       <div class="service-btn" @click="onContact">
@@ -408,9 +430,20 @@ export default {
         vip: true,
         balance: 0,
       },
+      showAnnouncement: false,
+      isMobile: false,
+      isIOS: false,
     }
   },
   methods: {
+    // 检测移动设备
+    checkMobileDevice() {
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera
+      this.isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+        userAgent.toLowerCase()
+      )
+      this.isIOS = /iphone|ipad|ipod/i.test(userAgent.toLowerCase())
+    },
     // 联系客服
     onContact() {
       this.$message.info('联系客服：可弹出客服二维码或聊天窗口')
@@ -521,6 +554,12 @@ export default {
       this.$message.success('退出成功')
       // 可跳转到登录：this.$router.push('/login')
     },
+  },
+  created() {
+    // 检测设备类型
+    this.checkMobileDevice()
+    // 页面加载时显示公告弹窗
+    this.showAnnouncement = true
   },
 }
 </script>
@@ -1028,5 +1067,100 @@ export default {
   height: 44px;
   font-size: 16px;
   margin-top: 20px;
+}
+
+/* 平台公告弹窗样式 */
+.announcement-dialog >>> .el-dialog {
+  border-radius: 8px;
+  margin-top: 10vh !important;
+  max-width: 500px;
+}
+
+.announcement-dialog >>> .el-dialog__header {
+  text-align: left;
+  padding: 15px 20px;
+  position: relative;
+}
+
+.announcement-dialog >>> .el-dialog__title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.announcement-dialog >>> .el-dialog__headerbtn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 16px;
+}
+
+.announcement-content {
+  min-height: 150px;
+  padding: 0 20px;
+}
+
+.announcement-content p {
+  margin: 15px 0;
+  line-height: 1.6;
+  font-size: 17px;
+}
+
+.announcement-dialog >>> .el-dialog__footer {
+  text-align: right;
+  padding: 15px 20px;
+}
+
+.announcement-dialog >>> .el-button {
+  padding: 10px 20px;
+}
+
+/* 移动端适配 */
+@media screen and (max-width: 768px) {
+  .announcement-dialog >>> .el-dialog {
+    width: 90% !important;
+    margin: 15vh auto !important;
+    border-radius: 12px;
+    overflow: hidden;
+    max-height: 70vh;
+  }
+
+  .announcement-dialog >>> .el-dialog__header {
+    padding: 12px 15px;
+  }
+
+  .announcement-dialog >>> .el-dialog__title {
+    font-size: 16px;
+  }
+
+  .announcement-dialog >>> .el-dialog__headerbtn {
+    top: 12px;
+    right: 15px;
+    font-size: 18px;
+  }
+
+  .announcement-dialog >>> .el-dialog__headerbtn .el-dialog__close {
+    font-weight: bold;
+  }
+
+  .announcement-content {
+    min-height: 120px;
+    padding: 0 15px;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+
+  .announcement-content p {
+    margin: 12px 0;
+    font-size: 14px;
+  }
+
+  .announcement-dialog >>> .el-dialog__footer {
+    padding: 12px 15px;
+  }
+
+  .announcement-dialog >>> .el-button {
+    padding: 8px 15px;
+    font-size: 13px;
+  }
 }
 </style>
