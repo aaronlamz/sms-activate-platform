@@ -27,14 +27,10 @@ http://localhost:8080
 - 登录: http://localhost:8080/login
 - 充值页面: http://localhost:8080/payment/index.html
 
-### 打包部署
+### 部署指南
+
+本地执行以下命令构建，将制品 dist 文件夹中的内容部署到服务器上即可
 
 ```shell
 yarn build
-```
-
-将制品 dist 文件夹中的内容部署到服务器上即可
-
-```shell
-
 ```
