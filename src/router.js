@@ -2,7 +2,6 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '@/views/Home.vue'
 import Login from '@/views/Login.vue'
-// import Register from '@/views/Register.vue'
 
 Vue.use(Router)
 
@@ -25,15 +24,6 @@ const router = new Router({
         title: '登录',
       },
     },
-    // 废弃注册页面，使用登录页面切换注册模块
-    // {
-    //   path: '/register',
-    //   name: 'register',
-    //   component: Register,
-    //   meta: {
-    //     title: '注册',
-    //   },
-    // },
   ],
 })
 
