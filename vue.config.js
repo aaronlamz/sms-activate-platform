@@ -1,5 +1,6 @@
 const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
+  publicPath: '/sms-activate-platform/', // 部署目录路径，根据实际情况修改
   transpileDependencies: true,
   devServer: {
     open: true, // 自动打开浏览器

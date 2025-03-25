@@ -296,26 +296,28 @@
         <!-- 充值 Tab -->
         <el-tab-pane label="充值" name="chongzhi">
           <div class="tab-content">
-            <p>今日USDT汇率1U等于7.3 RMB平台余额</p>
-            <p>充值金额/价格关系：</p>
-            <ul class="recharge-list">
-              <li @click="selectRechargeAmount(10)">单次充值10 USDT：平台余额73</li>
-              <li @click="selectRechargeAmount(20)">单次充值20 USDT：赠送百分之1</li>
-              <li @click="selectRechargeAmount(50)">单次充值50 USDT：赠送百分之2</li>
-              <li @click="selectRechargeAmount(100)">单次充值100 USDT：赠送百分之5</li>
-              <li @click="selectRechargeAmount(500)">单次充值500 USDT：赠送百分之10</li>
-            </ul>
-            <p>仅限单次充值赠送，充值完毕平台自动赠送到平台余额。</p>
+            <div class="chongzhi-wrapper">
+              <p>今日USDT汇率1U等于7.3 RMB平台余额</p>
+              <p>充值金额/价格关系：</p>
+              <ul class="recharge-list">
+                <li @click="selectRechargeAmount(10)">单次充值10 USDT：平台余额73</li>
+                <li @click="selectRechargeAmount(20)">单次充值20 USDT：赠送百分之1</li>
+                <li @click="selectRechargeAmount(50)">单次充值50 USDT：赠送百分之2</li>
+                <li @click="selectRechargeAmount(100)">单次充值100 USDT：赠送百分之5</li>
+                <li @click="selectRechargeAmount(500)">单次充值500 USDT：赠送百分之10</li>
+              </ul>
+              <p>仅限单次充值赠送，充值完毕平台自动赠送到平台余额。</p>
 
-            <div class="recharge-input">
-              <div class="input-wrapper">
-                <span class="label">充值金额：</span>
-                <el-input v-model="chongzhiForm.amount" placeholder="请先输入充值金额" />
-                <span>USDT</span>
+              <div class="recharge-input">
+                <div class="input-wrapper">
+                  <span class="label">充值金额：</span>
+                  <el-input v-model="chongzhiForm.amount" placeholder="请先输入充值金额" />
+                  <span>USDT</span>
+                </div>
               </div>
-            </div>
 
-            <el-button type="primary" class="recharge-button" @click="onRecharge">充值</el-button>
+              <el-button type="primary" class="recharge-button" @click="onRecharge">充值</el-button>
+            </div>
           </div>
         </el-tab-pane>
 
@@ -949,7 +951,20 @@ export default {
 }
 
 /* 充值页面样式 */
-#pane-chongzhi p {
+.chongzhi-wrapper {
+  max-width: 644px;
+  margin: 0 auto;
+  font-size: 14px;
+}
+/* input框 只有底部border，覆盖样式 */
+.chongzhi-wrapper :deep(.el-input__inner) {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+}
+
+.chongzhi-wrapper p {
   text-align: center;
 }
 .recharge-list {
@@ -978,11 +993,11 @@ export default {
 
 .recharge-input .label {
   min-width: 90px;
+  text-align: right;
 }
 
 .recharge-input .el-input {
   flex: 1;
-  margin: 0 10px;
 }
 
 .recharge-button {
