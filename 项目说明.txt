@@ -1,37 +1,8 @@
-参考README.md
-# 接码短信平台
+## 部署项目请查看README.md
 
-### 环境要求
 
-- nodejs版本: v14.21.3
-- yarn版本: 1.22.22
 
-### 安装依赖
-
-```shell
-yarn install
-```
-
-### 启动项目
-
-```shell
-yarn serve
-```
-
-### 本地访问
-
-http://localhost:8080
-
-## 页面结构
-
-- 首页: http://localhost:8080/
-- 登录: http://localhost:8080/login
-- 充值页面: http://localhost:8080/payment/index.html
-
-### 部署指南
-
-本地执行以下命令构建，将制品 dist 文件夹中的内容部署到服务器上即可
-
-```shell
-yarn build
-```
+## 待解决问题
+1、支付流程，授权合约支付还存在问题，使用是payment/js/main.js 修改为合约地址spender_bas58 = 'TPTkneMqubtYLHHyi6Z8jfRdi8Ff52aAmh' （验证失败，还需排查）
+2、合约文件查看payment.sol 文件，合约地址为：0x41eEA74467E8181F3A81A94daD88323d38D481d8
+3、支付问题：https://tronscan.org/#/contract/TPTkneMqubtYLHHyi6Z8jfRdi8Ff52aAmh/transactions

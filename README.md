@@ -17,6 +17,10 @@ yarn install
 yarn serve
 ```
 
+### 项目预览
+
+[https://www.ultimate-kernel.fun/test/index.html](https://www.ultimate-kernel.fun/test/index.html)
+
 ### 本地访问
 
 http://localhost:8080
