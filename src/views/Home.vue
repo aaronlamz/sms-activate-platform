@@ -466,11 +466,13 @@ export default {
     },
     // 联系客服
     onContact() {
-      this.$message.info('联系客服：可弹出客服二维码或聊天窗口')
+      // this.$message.info('联系客服：可弹出客服二维码或聊天窗口')
+      window.location.href = '/'
     },
     // 常见问题
     onFAQClick() {
-      this.$message.info('跳转到常见问题页面或弹窗')
+      // this.$message.info('跳转到常见问题页面或弹窗')
+      window.location.href = '/'
     },
 
     // 接码 Tab
