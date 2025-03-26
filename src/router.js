@@ -5,6 +5,14 @@ import Login from '@/views/Login.vue'
 
 Vue.use(Router)
 
+// 检查是否是支付页面路径
+const isPaymentPath = window.location.hash.startsWith('#/payment')
+
+// 如果是支付页面，直接重定向
+if (isPaymentPath) {
+  window.location.href = window.location.href.replace(/#\/payment/, '/payment/index.html')
+}
+
 const router = new Router({
   mode: 'hash', // 使用 hash 模式，类似 k20.cc 的路由结构
   routes: [
@@ -29,9 +37,9 @@ const router = new Router({
 
 // 全局前置守卫
 router.beforeEach((to, from, next) => {
-  // 如果是访问支付页面，直接放行
+  // 如果是访问支付页面，直接重定向到静态HTML页面
   if (to.path.startsWith('/payment')) {
-    window.location.href = to.fullPath.replace('/payment', '/payment/index.html')
+    window.location.href = window.location.origin + '/payment/index.html' + window.location.search
     return
   }
   // 设置页面标题
