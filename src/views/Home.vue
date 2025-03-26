@@ -1033,9 +1033,10 @@ export default {
       const requiredBalance = 0.6 // 假设每次获取号码需要0.6 USDT
       return new Promise((resolve, reject) => {
         if (this.userInfo.balance < requiredBalance) {
-          this.$confirm('余额不足，是否前往充值？', '提示', {
-            confirmButtonText: '去充值',
+          this.$confirm('余额不足', '提示', {
+            confirmButtonText: '确定',
             cancelButtonText: '取消',
+            showCancelButton: false,
             type: 'warning',
             center: true,
           })
@@ -1064,9 +1065,27 @@ export default {
       }
     },
     onBlockNumber() {
+      if (!this.jiemaResult.phone) {
+        this.$confirm('未获取手机号码', '提示', {
+          confirmButtonText: '确定',
+          type: 'warning',
+          showCancelButton: false,
+          center: true,
+        })
+        return
+      }
       this.$message.warning('号码已拉黑')
     },
     onReleaseNumber() {
+      if (!this.jiemaResult.phone) {
+        this.$confirm('未获取手机号码', '提示', {
+          confirmButtonText: '确定',
+          type: 'warning',
+          showCancelButton: false,
+          center: true,
+        })
+        return
+      }
       this.jiemaResult.phone = ''
       this.jiemaResult.code = ''
       this.jiemaResult.smsContent = ''
@@ -1093,9 +1112,27 @@ export default {
       }
     },
     onBlockNumberSMS() {
+      if (!this.faduanxinResult.phone) {
+        this.$confirm('请先获取手机号码', '提示', {
+          confirmButtonText: '确定',
+          type: 'warning',
+          showCancelButton: false,
+          center: true,
+        })
+        return
+      }
       this.$message.warning('号码已拉黑')
     },
     onReleaseNumberSMS() {
+      if (!this.faduanxinResult.phone) {
+        this.$confirm('请先获取手机号码', '提示', {
+          confirmButtonText: '确定',
+          type: 'warning',
+          showCancelButton: false,
+          center: true,
+        })
+        return
+      }
       this.faduanxinResult.phone = ''
       this.faduanxinForm.sendTo = ''
       this.faduanxinForm.smsText = ''
@@ -1125,9 +1162,10 @@ export default {
     onRecharge() {
       // 判断用户是否登录
       if (!localStorage.getItem('smsToken')) {
-        this.$confirm('您还未登录，需要先登录后才能充值，是否前往登录页面？', '提示', {
+        this.$confirm('请先登录', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
+          showCancelButton: false,
           type: 'warning',
         })
           .then(() => {
@@ -1175,9 +1213,10 @@ export default {
       if (newVal === 'wode') {
         // 检查是否登录
         if (!localStorage.getItem('smsToken')) {
-          this.$confirm('您还未登录，需要先登录才能查看个人信息，是否前往登录页面？', '提示', {
+          this.$confirm('请先登录', '提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
+            showCancelButton: false,
             type: 'warning',
           })
             .then(() => {
