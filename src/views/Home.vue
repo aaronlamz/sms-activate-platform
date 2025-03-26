@@ -60,8 +60,8 @@
                   <div class="form-item">
                     <span class="label">运营商：</span>
                     <el-select v-model="jiemaForm.carrier" placeholder="请选择运营商">
-                      <el-option label="国内接码" value="国内接码"></el-option>
-                      <el-option label="海外接码" value="海外接码"></el-option>
+                      <el-option label="国内接码" value="1"></el-option>
+                      <el-option label="海外接码" value="2"></el-option>
                     </el-select>
                   </div>
                 </el-col>
@@ -69,9 +69,13 @@
                   <div class="form-item">
                     <span class="label">归属地：</span>
                     <el-select v-model="jiemaForm.location" placeholder="不限">
-                      <el-option label="不限" value="不限"></el-option>
-                      <el-option label="北京" value="北京"></el-option>
-                      <el-option label="上海" value="上海"></el-option>
+                      <!-- <el-option label="不限" value="不限"></el-option> -->
+                      <el-option
+                        v-for="item in jiemaForm.carrier === '1' ? locationList1 : locationList2"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.name"
+                      ></el-option>
                     </el-select>
                   </div>
                 </el-col>
@@ -93,7 +97,7 @@
                     <span class="label">指定号码：</span>
                     <el-input
                       v-model="jiemaForm.phonePrefix"
-                      placeholder="输入号码或号段前3位置（例：152，188）"
+                      placeholder="输入号码或号段前3位或（例：152、188） 可不填"
                     />
                   </div>
                 </el-col>
@@ -153,8 +157,14 @@
                     <span class="label">归属地：</span>
                     <el-select v-model="faduanxinForm.location" placeholder="不限">
                       <el-option label="不限" value="不限"></el-option>
-                      <el-option label="北京" value="北京"></el-option>
-                      <el-option label="上海" value="上海"></el-option>
+                      <el-option
+                        v-for="item in faduanxinForm.carrier === '国内接码'
+                          ? locationList1
+                          : locationList2"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.name"
+                      ></el-option>
                     </el-select>
                   </div>
                 </el-col>
@@ -407,6 +417,530 @@ export default {
   name: 'Home',
   data() {
     return {
+      locationList1: [
+        {
+          id: 1,
+          name: '不限',
+        },
+        {
+          id: 2,
+          name: '河北',
+        },
+        {
+          id: 3,
+          name: '山西',
+        },
+        {
+          id: 4,
+          name: '辽宁',
+        },
+        {
+          id: 5,
+          name: '吉林',
+        },
+        {
+          id: 6,
+          name: '黑龙江',
+        },
+        {
+          id: 7,
+          name: '江苏',
+        },
+        {
+          id: 8,
+          name: '浙江',
+        },
+        {
+          id: 9,
+          name: '安徽',
+        },
+        {
+          id: 10,
+          name: '福建',
+        },
+        {
+          id: 11,
+          name: '江西',
+        },
+        {
+          id: 12,
+          name: '山东',
+        },
+        {
+          id: 13,
+          name: '河南',
+        },
+        {
+          id: 14,
+          name: '湖北',
+        },
+        {
+          id: 15,
+          name: '湖南',
+        },
+        {
+          id: 16,
+          name: '广东',
+        },
+        {
+          id: 17,
+          name: '海南',
+        },
+        {
+          id: 18,
+          name: '四川',
+        },
+        {
+          id: 19,
+          name: '贵州',
+        },
+        {
+          id: 20,
+          name: '云南',
+        },
+        {
+          id: 21,
+          name: '陕西',
+        },
+        {
+          id: 22,
+          name: '甘肃',
+        },
+        {
+          id: 23,
+          name: '青海',
+        },
+        {
+          id: 24,
+          name: '北京',
+        },
+        {
+          id: 25,
+          name: '天津',
+        },
+        {
+          id: 26,
+          name: '上海',
+        },
+        {
+          id: 27,
+          name: '重庆',
+        },
+        {
+          id: 28,
+          name: '内蒙古',
+        },
+        {
+          id: 29,
+          name: '广西',
+        },
+        {
+          id: 30,
+          name: '西藏',
+        },
+        {
+          id: 31,
+          name: '宁夏',
+        },
+        {
+          id: 32,
+          name: '新疆',
+        },
+        {
+          id: 33,
+          name: '香港',
+        },
+        {
+          id: 34,
+          name: '澳门',
+        },
+        {
+          id: 35,
+          name: '台湾',
+        },
+      ],
+      locationList2: [
+        {
+          id: 1,
+          name: '美国',
+        },
+        {
+          id: 2,
+          name: '日本',
+        },
+        {
+          id: 4,
+          name: '韩国',
+        },
+        {
+          id: 5,
+          name: '印度',
+        },
+        {
+          id: 6,
+          name: '德国',
+        },
+        {
+          id: 7,
+          name: '英国',
+        },
+        {
+          id: 9,
+          name: '新加坡',
+        },
+        {
+          id: 11,
+          name: '澳大利亚',
+        },
+        {
+          id: 13,
+          name: '法国',
+        },
+        {
+          id: 16,
+          name: '伊拉克',
+        },
+        {
+          id: 17,
+          name: '印尼',
+        },
+        {
+          id: 18,
+          name: '俄罗斯',
+        },
+        {
+          id: 21,
+          name: '阿根廷',
+        },
+        {
+          id: 22,
+          name: '阿拉伯联合酋长国',
+        },
+        {
+          id: 23,
+          name: '阿曼',
+        },
+        {
+          id: 31,
+          name: '白俄罗斯',
+        },
+        {
+          id: 33,
+          name: '冰岛',
+        },
+        {
+          id: 44,
+          name: '刚果民主共和国',
+        },
+        {
+          id: 50,
+          name: '加拿大',
+        },
+        {
+          id: 55,
+          name: '老挝',
+        },
+        {
+          id: 60,
+          name: '缅甸',
+        },
+        {
+          id: 61,
+          name: '摩洛哥',
+        },
+        {
+          id: 67,
+          name: '尼日利亚',
+        },
+        {
+          id: 68,
+          name: '挪威',
+        },
+        {
+          id: 70,
+          name: '塞尔维亚',
+        },
+        {
+          id: 72,
+          name: '沙特阿拉伯',
+        },
+        {
+          id: 78,
+          name: '坦桑尼亚',
+        },
+        {
+          id: 80,
+          name: '土耳其',
+        },
+        {
+          id: 85,
+          name: '新西兰',
+        },
+        {
+          id: 86,
+          name: '牙买加',
+        },
+        {
+          id: 88,
+          name: '伊朗',
+        },
+        {
+          id: 91,
+          name: '卡塔尔',
+        },
+        {
+          id: 95,
+          name: '葡萄牙',
+        },
+        {
+          id: 96,
+          name: '阿富汗',
+        },
+        {
+          id: 97,
+          name: '埃及',
+        },
+        {
+          id: 98,
+          name: '埃塞俄比亚',
+        },
+        {
+          id: 99,
+          name: '爱尔兰',
+        },
+        {
+          id: 100,
+          name: '爱沙尼亚',
+        },
+        {
+          id: 102,
+          name: '巴基斯坦',
+        },
+        {
+          id: 105,
+          name: '巴西',
+        },
+        {
+          id: 107,
+          name: '比利时',
+        },
+        {
+          id: 108,
+          name: '波兰',
+        },
+        {
+          id: 112,
+          name: '朝鲜',
+        },
+        {
+          id: 113,
+          name: '丹麦',
+        },
+        {
+          id: 118,
+          name: '菲律宾',
+        },
+        {
+          id: 120,
+          name: '芬兰',
+        },
+        {
+          id: 125,
+          name: '格鲁吉亚',
+        },
+        {
+          id: 126,
+          name: '古巴',
+        },
+        {
+          id: 128,
+          name: '哈萨克斯坦',
+        },
+        {
+          id: 130,
+          name: '荷兰',
+        },
+        {
+          id: 133,
+          name: '柬埔寨',
+        },
+        {
+          id: 134,
+          name: '捷克',
+        },
+        {
+          id: 136,
+          name: '科索沃',
+        },
+        {
+          id: 138,
+          name: '克罗地亚',
+        },
+        {
+          id: 141,
+          name: '黎巴嫩',
+        },
+        {
+          id: 142,
+          name: '立陶宛',
+        },
+        {
+          id: 147,
+          name: '罗马尼亚',
+        },
+        {
+          id: 149,
+          name: '马尔代夫',
+        },
+        {
+          id: 151,
+          name: '马来西亚',
+        },
+        {
+          id: 155,
+          name: '蒙古',
+        },
+        {
+          id: 156,
+          name: '孟加拉国',
+        },
+        {
+          id: 157,
+          name: '秘鲁',
+        },
+        {
+          id: 160,
+          name: '摩纳哥',
+        },
+        {
+          id: 161,
+          name: '墨西哥',
+        },
+        {
+          id: 162,
+          name: '南非',
+        },
+        {
+          id: 165,
+          name: '瑞典',
+        },
+        {
+          id: 166,
+          name: '瑞士',
+        },
+        {
+          id: 167,
+          name: '萨尔瓦多',
+        },
+        {
+          id: 172,
+          name: '斯洛伐克',
+        },
+        {
+          id: 173,
+          name: '斯洛文尼亚',
+        },
+        {
+          id: 174,
+          name: '斯威士兰',
+        },
+        {
+          id: 175,
+          name: '苏丹',
+        },
+        {
+          id: 179,
+          name: '泰国',
+        },
+        {
+          id: 180,
+          name: '汤加',
+        },
+        {
+          id: 181,
+          name: '突尼斯',
+        },
+        {
+          id: 184,
+          name: '委内瑞拉',
+        },
+        {
+          id: 185,
+          name: '乌克兰',
+        },
+        {
+          id: 186,
+          name: '乌拉圭',
+        },
+        {
+          id: 188,
+          name: '希腊',
+        },
+        {
+          id: 190,
+          name: '叙利亚',
+        },
+        {
+          id: 191,
+          name: '也门',
+        },
+        {
+          id: 192,
+          name: '意大利',
+        },
+        {
+          id: 194,
+          name: '越南',
+        },
+        {
+          id: 195,
+          name: '赞比亚',
+        },
+        {
+          id: 196,
+          name: '智利',
+        },
+        {
+          id: 197,
+          name: '中非共和国',
+        },
+        {
+          id: 200,
+          name: '西班牙',
+        },
+        {
+          id: 201,
+          name: '以色列',
+        },
+        {
+          id: 202,
+          name: '厄瓜多尔',
+        },
+        {
+          id: 203,
+          name: '阿塞拜疆',
+        },
+        {
+          id: 207,
+          name: '斯里兰卡',
+        },
+        {
+          id: 208,
+          name: '巴布新几内亚',
+        },
+        {
+          id: 204,
+          name: '中国香港',
+        },
+        {
+          id: 205,
+          name: '中国澳门',
+        },
+        {
+          id: 206,
+          name: '中国台湾',
+        },
+      ],
       activeTab: 'jiema', // 默认进入接码
       // 接码
       jiemaForm: {
@@ -448,7 +982,7 @@ export default {
       userInfo: {
         username: 'xabc123456',
         vip: true,
-        balance: 0,
+        balance: 0, // 用户余额，后续从接口获取
       },
       showAnnouncement: false,
       isMobile: false,
@@ -475,10 +1009,48 @@ export default {
       window.location.href = '/'
     },
 
+    // TODO: 获取用户余额接口
+    async getUserBalance() {
+      // 这里后续接入实际的余额查询接口
+      // const res = await api.getUserBalance()
+      // this.userInfo.balance = res.data.balance
+      this.userInfo.balance = 0 // 目前mock为0，强制用户去充值
+    },
+
+    // 检查余额是否充足
+    checkBalance() {
+      const requiredBalance = 0.6 // 假设每次获取号码需要0.6 USDT
+      return new Promise((resolve, reject) => {
+        if (this.userInfo.balance < requiredBalance) {
+          this.$confirm('余额不足，是否前往充值？', '提示', {
+            confirmButtonText: '去充值',
+            cancelButtonText: '取消',
+            type: 'warning',
+            center: true,
+          })
+            .then(() => {
+              this.activeTab = 'chongzhi'
+              reject(new Error('余额不足'))
+            })
+            .catch(() => {
+              reject(new Error('用户取消'))
+            })
+        } else {
+          resolve()
+        }
+      })
+    },
+
     // 接码 Tab
-    onGetNumber() {
-      this.jiemaResult.phone = '188****8888'
-      this.$message.success('已获取号码')
+    async onGetNumber() {
+      try {
+        await this.checkBalance()
+        this.jiemaResult.phone = '188****8888'
+        this.$message.success('已获取号码')
+      } catch (error) {
+        // 余额不足或用户取消的情况已在checkBalance中处理
+        return
+      }
     },
     onBlockNumber() {
       this.$message.warning('号码已拉黑')
@@ -499,9 +1071,15 @@ export default {
     },
 
     // 发短信 Tab
-    onGetNumberSMS() {
-      this.faduanxinResult.phone = '188****0000'
-      this.$message.success('已获取号码')
+    async onGetNumberSMS() {
+      try {
+        await this.checkBalance()
+        this.faduanxinResult.phone = '188****0000'
+        this.$message.success('已获取号码')
+      } catch (error) {
+        // 余额不足或用户取消的情况已在checkBalance中处理
+        return
+      }
     },
     onBlockNumberSMS() {
       this.$message.warning('号码已拉黑')
@@ -605,6 +1183,15 @@ export default {
             })
         }
       }
+    },
+    // 监听运营商变化
+    'jiemaForm.carrier'(newVal) {
+      // 重置归属地选择
+      this.jiemaForm.location = '不限'
+    },
+    'faduanxinForm.carrier'(newVal) {
+      // 重置归属地选择
+      this.faduanxinForm.location = '不限'
     },
   },
   created() {

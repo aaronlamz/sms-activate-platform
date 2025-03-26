@@ -29,7 +29,7 @@ http://localhost:8080
 
 - 首页: http://localhost:8080/
 - 登录: http://localhost:8080/login
-- 充值页面: http://localhost:8080/payment/index.html
+- 充值: http://localhost:8080/payment/index.html
 
 ### 部署指南
 
