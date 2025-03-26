@@ -1,6 +1,5 @@
 /* Element UI Message Box 样式覆盖 */
 .el-message-box {
-  width: auto;
   padding-bottom: 10px;
 }
 
