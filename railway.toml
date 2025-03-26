@@ -1,0 +1,14 @@
+[build]
+builder = "nixpacks"
+buildCommand = "yarn install && yarn build"
+
+[deploy]
+startCommand = "yarn serve"
+healthcheckPath = "/"
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+[variables]
+VUE_APP_API_URL = "https://sms-activate-platform-production.up.railway.app"
+PORT = "3000" 

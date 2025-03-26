@@ -8,6 +8,11 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+// 健康检查路由
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' })
+})
+
 // 路由
 const userRoutes = require('./routes/userRoutes')
 app.use('/api/users', userRoutes)
@@ -18,7 +23,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something broke!' })
 })
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 8080
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`)
 })
