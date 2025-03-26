@@ -1200,8 +1200,9 @@ export default {
       this.$message.info('查看使用记录...')
     },
     onLogout() {
-      // 清除登录状态
+      // 清除登录状态和用户信息
       localStorage.removeItem('smsToken')
+      localStorage.removeItem('userInfo')
       this.$message.success('退出成功')
       // 跳转到登录页面
       this.$router.push('/login')
@@ -1249,6 +1250,12 @@ export default {
     this.checkMobileDevice()
     // 页面加载时显示公告弹窗
     this.showAnnouncement = true
+
+    // 从 localStorage 获取用户信息
+    const userInfo = localStorage.getItem('userInfo')
+    if (userInfo) {
+      this.userInfo = JSON.parse(userInfo)
+    }
 
     // 如果直接访问"我的"页面，检查登录状态
     if (this.activeTab === 'wode' && !localStorage.getItem('smsToken')) {

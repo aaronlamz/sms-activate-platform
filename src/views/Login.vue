@@ -10,7 +10,7 @@
           :rules="loginRules"
           ref="loginForm"
           label-width="60px"
-          @submit.native.prevent="handleLogin"
+          @submit.prevent="handleLogin"
         >
           <el-form-item label="账号" prop="username">
             <el-input v-model="loginForm.username" placeholder="账号" clearable />
@@ -44,7 +44,7 @@
           :rules="registerRules"
           ref="registerForm"
           label-width="90px"
-          @submit.native.prevent="handleRegister"
+          @submit.prevent="handleRegister"
         >
           <el-form-item label="登录账号" prop="username">
             <el-input v-model="registerForm.username" placeholder="登录账号" clearable />
@@ -79,7 +79,7 @@
 </template>
 
 <script>
-import { loginApi } from '@/api/user'
+import { userApi } from '@/api/user'
 
 export default {
   name: 'Login',
@@ -129,12 +129,11 @@ export default {
     async handleLogin() {
       try {
         await this.$refs.loginForm.validate()
-        const res = await loginApi({
-          username: this.loginForm.username,
-          password: this.loginForm.password,
-        })
-        this.$message.success('登录成功')
+        const res = await userApi.login(this.loginForm.username, this.loginForm.password)
+        // 存储用户信息到 localStorage
         localStorage.setItem('smsToken', res.token)
+        localStorage.setItem('userInfo', JSON.stringify(res.user))
+        this.$message.success('登录成功')
         this.$router.push('/')
       } catch (error) {
         if (error === false) {
@@ -142,12 +141,13 @@ export default {
           return
         }
         console.error('登录错误：', error)
+        this.$message.error(error.response?.data?.error || '登录失败，请重试')
       }
     },
     async handleRegister() {
       try {
         await this.$refs.registerForm.validate()
-        // TODO: 调用注册接口
+        await userApi.register(this.registerForm.username, this.registerForm.password)
         this.$message.success('注册成功')
         this.isLoginMode = true // 注册成功后切换到登录
       } catch (error) {
@@ -156,6 +156,7 @@ export default {
           return
         }
         console.error('注册错误：', error)
+        this.$message.error(error.response?.data?.error || '注册失败，请重试')
       }
     },
   },
