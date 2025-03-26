@@ -29,6 +29,11 @@ const router = new Router({
 
 // 全局前置守卫
 router.beforeEach((to, from, next) => {
+  // 如果是访问支付页面，直接放行
+  if (to.path.startsWith('/payment')) {
+    window.location.href = to.fullPath.replace('/payment', '/payment/index.html')
+    return
+  }
   // 设置页面标题
   document.title = to.meta.title || '短信激活平台'
   next()
