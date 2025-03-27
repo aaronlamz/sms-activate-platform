@@ -14,7 +14,7 @@ if (isPaymentPath) {
 }
 
 const router = new Router({
-  mode: 'hash', // 使用 hash 模式，类似 k20.cc 的路由结构
+  mode: 'hash', // 使用 hash 模式，类似 dingzan.vip 的路由结构
   routes: [
     {
       path: '/',

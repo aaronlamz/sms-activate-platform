@@ -1,8 +1,33 @@
 import axios from 'axios'
 
+// 根据当前访问方式动态确定API基础URL
+function getBaseUrl() {
+  // 获取当前协议(http/https)
+  const protocol = window.location.protocol
+  const currentHost = window.location.hostname
+
+  // 检查是否是IP地址 (简单验证数字和点的组合)
+  const isIPAddress = /^[0-9.]+$/.test(currentHost)
+
+  // 开发环境
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:3000/api'
+  }
+
+  // 生产环境
+  if (isIPAddress) {
+    // 如果是IP访问，API也使用相同IP
+    return `${protocol}//${currentHost}/api`
+  } else if (currentHost === 'dingzan.vip' || currentHost === 'www.dingzan.vip') {
+    // 如果是域名访问，使用API域名，保持相同协议
+    return `${protocol}//api.dingzan.vip/api`
+  } else {
+    // 其他情况，使用相对路径
+    return '/api'
+  }
+}
 // 根据环境设置不同的 baseURL
-const baseURL =
-  process.env.NODE_ENV === 'production' ? 'http://api.dingzan.vip/api' : 'http://localhost:8080/api'
+const baseURL = getBaseUrl()
 
 // 创建 axios 实例
 const api = axios.create({
