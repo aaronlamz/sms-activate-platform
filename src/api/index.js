@@ -2,9 +2,7 @@ import axios from 'axios'
 
 // 根据环境设置不同的 baseURL
 const baseURL =
-  process.env.NODE_ENV === 'production'
-    ? 'https://sms-activate-platform-production.up.railway.app/api'
-    : 'http://localhost:8080/api'
+  process.env.NODE_ENV === 'production' ? 'http://api.dingzan.vip' : 'http://localhost:8080/api'
 
 // 创建 axios 实例
 const api = axios.create({
