@@ -1,11 +1,11 @@
 const express = require('express')
-const cors = require('cors')
+// const cors = require('cors')
 require('dotenv').config()
 
 const app = express()
 
-// 中间件
-app.use(cors())
+// 中间件// 不应用CORS中间件
+// app.use(cors())
 app.use(express.json())
 
 // 健康检查路由
