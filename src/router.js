@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '@/views/Home.vue'
 import Login from '@/views/Login.vue'
-
+import Api from '@/views/Api/index.vue'
 Vue.use(Router)
 
 // 检查是否是支付页面路径
@@ -30,6 +30,14 @@ const router = new Router({
       component: Login,
       meta: {
         title: '登录',
+      },
+    },
+    {
+      path: '/apipage',
+      name: 'apipage',
+      component: Api,
+      meta: {
+        title: 'API文档',
       },
     },
   ],

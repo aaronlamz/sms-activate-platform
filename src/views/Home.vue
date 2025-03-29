@@ -1221,6 +1221,7 @@ export default {
     // 我的 Tab
     onAPI() {
       // this.$message.info('查看API文档...')
+      this.$router.push('/apipage')
     },
     onLogs() {
       // this.$message.info('查看使用记录...')
@@ -1961,9 +1962,9 @@ export default {
   font-size: 14px;
 }
 
-.menu-list li:last-child {
+/* .menu-list li:last-child {
   border-bottom: none;
-}
+} */
 
 .menu-list li:hover {
   background-color: #f5f7fa;
