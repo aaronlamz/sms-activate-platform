@@ -7515,7 +7515,7 @@ input[data-v-32490bde] {
 }
 
 .el-dialog__body {
-    padding: calc(var(--el-dialog-padding-primary) + 10px) var(--el-dialog-padding-primary);
+    /* padding: calc(var(--el-dialog-padding-primary) + 10px) var(--el-dialog-padding-primary); */
     color: var(--el-text-color-regular);
     font-size: var(--el-dialog-content-font-size);
     word-break: break-all
