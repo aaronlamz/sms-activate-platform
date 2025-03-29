@@ -30,7 +30,9 @@
               <small style="color: #999">(在公共设备上请勿勾选)</small>
             </el-checkbox>
           </div>
-          <el-button type="primary" class="submit-btn" @click="handleLogin">登录</el-button>
+          <el-button type="primary" class="submit-btn" @click="handleLogin" :loading="loginLoading"
+            >登录</el-button
+          >
           <div class="switch-mode">
             <span>还没有账号？</span>
             <a @click="switchMode">立即注册</a>
@@ -67,7 +69,13 @@
               show-password
             />
           </el-form-item>
-          <el-button type="primary" class="submit-btn" @click="handleRegister">注册</el-button>
+          <el-button
+            type="primary"
+            class="submit-btn"
+            @click="handleRegister"
+            :loading="registerLoading"
+            >注册</el-button
+          >
           <div class="switch-mode">
             <span>已有账号？</span>
             <a @click="switchMode">立即登录</a>
@@ -95,6 +103,8 @@ export default {
     }
     return {
       isLoginMode: true,
+      loginLoading: false,
+      registerLoading: false,
       loginForm: {
         username: '',
         password: '',
@@ -129,6 +139,7 @@ export default {
     async handleLogin() {
       try {
         await this.$refs.loginForm.validate()
+        this.loginLoading = true
         const res = await userApi.login(this.loginForm.username, this.loginForm.password)
         // 存储用户信息到 localStorage
         localStorage.setItem('smsToken', res.token)
@@ -142,11 +153,14 @@ export default {
         }
         console.error('登录错误：', error)
         this.$message.error(error.response?.data?.error || '登录失败，请重试')
+      } finally {
+        this.loginLoading = false
       }
     },
     async handleRegister() {
       try {
         await this.$refs.registerForm.validate()
+        this.registerLoading = true
         await userApi.register(this.registerForm.username, this.registerForm.password)
         this.$message.success('注册成功')
         this.isLoginMode = true // 注册成功后切换到登录
@@ -157,6 +171,8 @@ export default {
         }
         console.error('注册错误：', error)
         this.$message.error(error.response?.data?.error || '注册失败，请重试')
+      } finally {
+        this.registerLoading = false
       }
     },
   },

@@ -10,9 +10,9 @@ function getBaseUrl() {
   const isIPAddress = /^[0-9.]+$/.test(currentHost)
 
   // 开发环境
-  if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:3000/api'
-  }
+  // if (process.env.NODE_ENV === 'development') {
+  //   return 'http://localhost:3000/api'
+  // }
 
   // 生产环境
   if (isIPAddress) {

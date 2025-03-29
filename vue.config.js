@@ -7,13 +7,13 @@ module.exports = defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:3000', // 后端服务地址
-        changeOrigin: true, // 是否跨域
+        changeOrigin: true, // 启用跨域
       },
     },
   },
   chainWebpack: (config) => {
     config.plugin('html').tap((args) => {
-      args[0].title = '短信激活平台' // 设置页面标题
+      args[0].title = '短信接码平台' // 设置页面标题
       return args
     })
   },

@@ -285,7 +285,7 @@
                   <div class="el-timeline-item__timestamp is-top">号码归属地</div>
                   <div class="el-timeline-item__content">
                     <el-card class="is-always-shadow timeline-card">
-                      <div class="el-card__body">
+                      <div class="el-card__bodyx">
                         <el-select
                           v-model="callForm.location"
                           placeholder="CN/中国 +86"
@@ -310,12 +310,12 @@
                   <div class="el-timeline-item__timestamp is-top">租期</div>
                   <div class="el-timeline-item__content">
                     <el-card class="is-always-shadow timeline-card">
-                      <div class="el-card__body">
+                      <div class="el-card__bodyx">
                         <el-radio-group v-model="callForm.rentPeriod">
-                          <el-radio class="radio-item" label="日租">日租</el-radio>
-                          <el-radio class="radio-item" label="周租">周租</el-radio>
-                          <el-radio class="radio-item" label="月租">月租</el-radio>
-                          <el-radio class="radio-item" label="季租">季租</el-radio>
+                          <el-radio class="radio-item" label="日租" border>日租</el-radio>
+                          <el-radio class="radio-item" label="周租" border>周租</el-radio>
+                          <el-radio class="radio-item" label="月租" border>月租</el-radio>
+                          <el-radio class="radio-item" label="季租" border>季租</el-radio>
                         </el-radio-group>
                       </div>
                     </el-card>
@@ -327,10 +327,10 @@
                   <div class="el-timeline-item__timestamp is-top">套餐</div>
                   <div class="el-timeline-item__content">
                     <el-card class="is-always-shadow timeline-card">
-                      <div class="el-card__body">
+                      <div class="el-card__bodyx">
                         <el-radio-group v-model="callForm.packageType">
-                          <el-radio class="radio-item" label="隐私电话">隐私电话</el-radio>
-                          <el-radio class="radio-item" label="隐私短信">隐私短信</el-radio>
+                          <el-radio class="radio-item" label="隐私电话" border>隐私电话</el-radio>
+                          <el-radio class="radio-item" label="隐私短信" border>隐私短信</el-radio>
                         </el-radio-group>
                       </div>
                     </el-card>
@@ -1168,8 +1168,16 @@ export default {
     },
 
     // 打电话 Tab
-    onBuyNumber() {
-      this.$message.success(`成功购买${this.callForm.type}，租期：${this.callForm.rentPeriod}`)
+    async onBuyNumber() {
+      try {
+        // 检查余额是否充足
+        await this.checkBalance()
+        // 余额充足，执行购买逻辑
+        this.$message.success(`成功购买${this.callForm.type}，租期：${this.callForm.rentPeriod}`)
+      } catch (error) {
+        // 余额不足或用户取消的情况已在checkBalance中处理
+        return
+      }
     },
 
     // 充值 Tab
@@ -1212,10 +1220,10 @@ export default {
 
     // 我的 Tab
     onAPI() {
-      this.$message.info('查看API文档...')
+      // this.$message.info('查看API文档...')
     },
     onLogs() {
-      this.$message.info('查看使用记录...')
+      // this.$message.info('查看使用记录...')
     },
     onLogout() {
       // 清除登录状态和用户信息
@@ -1343,7 +1351,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 12px 0;
+  padding: 12px 0 30px;
   background: #fff;
   border-radius: 4px;
   cursor: pointer;
@@ -1624,8 +1632,8 @@ export default {
   background-color: unset;
 }
 .radio-item {
-  display: flex;
-  align-items: center;
+  /* display: flex; */
+  /* align-items: center; */
   padding: 12px 20px 12px 10px;
   border: 1px solid #e4e7ed;
   border-radius: 6px;
@@ -1710,6 +1718,10 @@ export default {
 
 .el-radio-group {
   display: flex;
+}
+
+.el-radio-group .el-radio.is-bordered + .el-radio.is-bordered {
+  margin-left: 0px;
 }
 
 @media screen and (max-width: 768px) {
@@ -1861,7 +1873,7 @@ export default {
 
   .announcement-content {
     min-height: 120px;
-    padding: 0 15px;
+    /* padding: 0 15px; */
     max-height: 50vh;
     overflow-y: auto;
   }
