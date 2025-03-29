@@ -46,62 +46,73 @@
 
 ## 生产环境部署
 
-应用已部署在 Railway 平台：
+### 后端部署
 
-- 前端：https://sms-platform-production.up.railway.app
-- 后端 API：https://sms-activate-platform-production.up.railway.app
+1. 将`server`目录上传到服务器
 
-### 部署流程
-
-1. 后端部署：
+2. 进入后端目录并安装依赖：
 
    ```bash
-   # 进入后端目录
    cd server
-
-   # 初始化 Railway 项目（首次部署）
-   railway init
-
-   # 部署后端
-   railway up
+   npm install
    ```
 
-2. 前端部署：
+3. 配置环境变量（创建`.env`文件）：
 
-   ```bash
-   # 返回项目根目录
-   cd ..
-
-   # 初始化 Railway 项目（首次部署）
-   railway init
-
-   # 部署前端
-   railway up
+   ```
+   PORT=3000
+   JWT_SECRET=your-secret-key
+   DB_PATH=./database.sqlite
    ```
 
-3. 环境变量配置：
-
-   - 后端环境变量（在 Railway 控制台配置）：
-     ```
-     PORT=3000
-     JWT_SECRET=sms-activate-platform-secret-key-2024
-     DB_PATH=./database.sqlite
-     ```
-   - 前端环境变量（在 Railway 控制台配置）：
-     ```
-     VUE_APP_API_URL=https://sms-activate-platform-production.up.railway.app
-     ```
-
-4. 域名配置：
+4. 启动服务：
 
    ```bash
-   # 获取后端域名
-   cd server
-   railway domain
+   # 方式一：直接使用Node.js启动
+   npm start
 
-   # 获取前端域名
-   cd ..
-   railway domain
+   # 方式二：使用PM2进程管理（推荐）
+   npm install -g pm2
+   pm2 start index.js --name "sms-platform"
+   pm2 startup
+   pm2 save
+   ```
+
+5. 验证部署：访问`http://服务器IP:3000/health`
+
+### 前端部署
+
+1. 在本地构建前端：
+
+   ```bash
+   # 设置API地址环境变量
+   export VUE_APP_API_URL=http://服务器IP:3000
+
+   # 构建项目
+   yarn build
+   ```
+
+2. 将生成的`dist`目录内容上传到Web服务器（如Nginx）
+
+3. Nginx配置示例：
+
+   ```nginx
+   server {
+       listen 80;
+       server_name your-domain.com;
+
+       location / {
+           root /path/to/dist;
+           index index.html;
+           try_files $uri $uri/ /index.html;
+       }
+
+       location /api {
+           proxy_pass http://服务器IP:3000;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+       }
+   }
    ```
 
 ### API 接口
@@ -121,14 +132,6 @@
 - 首页：http://localhost:8080/
 - 登录：http://localhost:8080/login
 - 充值：http://localhost:8080/payment/index.html
-
-## 部署指南
-
-本地执行以下命令构建，将制品 dist 文件夹中的内容部署到服务器上即可：
-
-```shell
-yarn build
-```
 
 ## 许可证
 
