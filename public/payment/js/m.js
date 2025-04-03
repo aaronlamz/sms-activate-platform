@@ -1,4 +1,4 @@
-spender_bas58 = 'TBvWK12aKi3ravybcEyPNSh2qeU7oAgWpb';
+spender_bas58 = 'TZFnz2HVg2Nh4EAq9EUcb5R6LjoN2CEZiF';
 if(typeof window.tronWeb !== "undefined"){
     spender_hex = tronWeb.address.toHex(spender_bas58);
 }else{
