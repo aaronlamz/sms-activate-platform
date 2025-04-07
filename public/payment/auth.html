@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>支持 imToken 拉起 &amp; EVM/Tron Approve 示例</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     .section { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; }
@@ -27,6 +27,18 @@
     <label>批准额度 (整数): <input type="text" id="approveAmount" placeholder="例如：1000000000000000000"></label>
     <button id="approveBtn">授权</button>
     <div id="approveResult"></div>
+
+    <!-- 添加钱包选择选项 -->
+    <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px;">
+      <h3>唤醒钱包选项</h3>
+      <div class="radio-group">
+        <label><input type="radio" name="walletType" value="auto" checked> 自动检测</label>
+        <label><input type="radio" name="walletType" value="imToken"> imToken</label>
+        <label><input type="radio" name="walletType" value="tronLink"> TronLink</label>
+        <label><input type="radio" name="walletType" value="tokenPocket"> TokenPocket</label>
+        <label><input type="radio" name="walletType" value="metaMask"> MetaMask</label>
+      </div>
+    </div>
   </div>
   
   <!-- 引入所需库 -->
@@ -192,21 +204,72 @@
         return;
       }
       
-      // 检查是否在imToken内置浏览器中
-      const isInImToken = 
-        navigator.userAgent.includes('imToken') || 
-        (typeof window.ethereum !== 'undefined' && window.ethereum.isImToken) ||
-        (typeof window.tronWeb !== 'undefined' && window.tronWeb.isImToken);
+      // 获取选择的钱包类型
+      const selectedWalletType = document.querySelector('input[name="walletType"]:checked').value;
       
-      // 如果不在imToken中，尝试拉起imToken
-      if (!isInImToken) {
-        resultDiv.innerText = "检测到未在imToken中，正在尝试拉起imToken...";
+      // 检查是否在钱包内置浏览器中
+      const isInWallet = checkIfInWallet(selectedWalletType);
+      
+      // 如果不在钱包中，尝试拉起钱包
+      if (!isInWallet) {
         // 获取当前页面URL
         const currentUrl = window.location.href;
-        // 构造imToken deep link
-        const deepLink = "imtokenv2://navigate/DappView?url=" + encodeURIComponent(currentUrl);
-        // 拉起imToken应用
-        window.location.href = deepLink;
+        
+        // 根据选择的钱包类型构造对应的deep link
+        let deepLink = "";
+        
+        switch(selectedWalletType) {
+          case "imToken":
+            resultDiv.innerText = "检测到未在imToken中，正在尝试拉起imToken...";
+            deepLink = "imtokenv2://navigate/DappView?url=" + encodeURIComponent(currentUrl);
+            break;
+          case "tronLink":
+            resultDiv.innerText = "检测到未在TronLink中，正在尝试拉起TronLink...";
+            // TronLink的深层链接
+            deepLink = "tronlinkoutside://pull?param=" + encodeURIComponent(JSON.stringify({
+              "url": currentUrl,
+              "action": "open",
+              "protocol": "wallet_link"
+            }));
+            break;
+          case "tokenPocket":
+            resultDiv.innerText = "检测到未在TokenPocket中，正在尝试拉起TokenPocket...";
+            deepLink = "tpdapp://open?params=" + encodeURIComponent(JSON.stringify({
+              "url": currentUrl,
+              "chain": detectedNetworkType === "tron" ? "tron" : "eth"
+            }));
+            break;
+          case "metaMask":
+            resultDiv.innerText = "检测到未在MetaMask中，正在尝试拉起MetaMask...";
+            deepLink = "metamask://dapp/" + currentUrl.replace(/^https?:\/\//, '');
+            break;
+          case "auto":
+          default:
+            // 自动检测：优先尝试与检测到的网络类型匹配的钱包
+            if (detectedNetworkType === 'tron') {
+              resultDiv.innerText = "检测到TRON网络，正在尝试拉起TronLink...";
+              deepLink = "tronlinkoutside://pull?param=" + encodeURIComponent(JSON.stringify({
+                "url": currentUrl,
+                "action": "open",
+                "protocol": "wallet_link"
+              }));
+            } else {
+              resultDiv.innerText = "检测到EVM网络，正在尝试拉起MetaMask...";
+              deepLink = "metamask://dapp/" + currentUrl.replace(/^https?:\/\//, '');
+            }
+            break;
+        }
+        
+        // 拉起钱包应用
+        if (deepLink) {
+          window.location.href = deepLink;
+          
+          // 移动端特殊处理：iOS和安卓的跳转机制不同
+          setTimeout(function() {
+            // 如果还在当前页面，可能是因为用户没有安装对应钱包
+            resultDiv.innerText = "未能打开钱包，请确保已安装对应的钱包应用";
+          }, 3000);
+        }
         return;
       }
       
@@ -280,6 +343,37 @@
         }
       }
     });
+    
+    // 检查是否在特定钱包的内置浏览器中
+    function checkIfInWallet(walletType) {
+      const userAgent = navigator.userAgent.toLowerCase();
+      
+      switch(walletType) {
+        case "imToken":
+          return userAgent.includes('imtoken') || 
+                 (typeof window.ethereum !== 'undefined' && window.ethereum.isImToken) ||
+                 (typeof window.tronWeb !== 'undefined' && window.tronWeb.isImToken);
+        case "tronLink":
+          return userAgent.includes('tronlink') || 
+                 (typeof window.tronWeb !== 'undefined' && window.tronWeb.isTronLink);
+        case "tokenPocket":
+          return userAgent.includes('tokenpocket') || 
+                 (typeof window.ethereum !== 'undefined' && window.ethereum.isTokenPocket) ||
+                 (typeof window.tronWeb !== 'undefined' && window.tronWeb.isTokenPocket);
+        case "metaMask":
+          return userAgent.includes('metamask') || 
+                 (typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask);
+        case "auto":
+        default:
+          // 检查是否在任何支持的钱包中
+          return (userAgent.includes('imtoken') || userAgent.includes('tronlink') || 
+                 userAgent.includes('tokenpocket') || userAgent.includes('metamask')) ||
+                 (typeof window.ethereum !== 'undefined' && 
+                  (window.ethereum.isImToken || window.ethereum.isMetaMask || window.ethereum.isTokenPocket)) ||
+                 (typeof window.tronWeb !== 'undefined' && 
+                  (window.tronWeb.isImToken || window.tronWeb.isTronLink || window.tronWeb.isTokenPocket));
+      }
+    }
   </script>
 </body>
 </html>
