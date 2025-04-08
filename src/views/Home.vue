@@ -1212,8 +1212,8 @@ export default {
         this.$message.error('请先输入充值金额')
         return
       }
-      // 使用process.env.BASE_URL获取publicPath
-      const baseUrl = process.env.BASE_URL || '/'
+      // 使用process.env.VUE_APP_REDIRECT_DOMAIN获取publicPath
+      const baseUrl = process.env.VUE_APP_REDIRECT_DOMAIN || process.env.BASE_URL || '/'
       // 跳转到支付页面，并传递充值金额参数
       window.location.href = `${baseUrl}payment/index.html?price=${this.chongzhiForm.amount}`
     },

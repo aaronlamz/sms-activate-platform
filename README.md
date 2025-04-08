@@ -88,6 +88,9 @@
    # 设置API地址环境变量
    export VUE_APP_API_URL=http://服务器IP:3000
 
+   # 设置跳转域名（可选）
+   export VUE_APP_REDIRECT_DOMAIN=https://your-domain.com/
+
    # 构建项目
    yarn build
    ```
