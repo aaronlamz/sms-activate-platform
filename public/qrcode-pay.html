@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>加密货币支付</title>
+  <!-- 引入QRCode.js库 -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background-color: #f7f9fc;
+    }
+    
+    .payment-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .payment-card {
+      max-width: 450px;
+      width: 100%;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .logo {
+      margin-bottom: 20px;
+    }
+    
+    .logo img {
+      width: 60px;
+      height: 60px;
+    }
+    
+    .order-number {
+      font-size: 14px;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    
+    .payment-network {
+      font-size: 14px;
+      margin-bottom: 15px;
+      color: #555;
+    }
+    
+    .warning-message {
+      margin-bottom: 20px;
+    }
+    
+    .error {
+      color: #ff4d4f;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    
+    .copy-tip {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .payment-amount {
+      margin: 25px 0;
+      cursor: pointer;
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    
+    .payment-amount:hover {
+      background-color: #f5f7fa;
+    }
+    
+    .amount {
+      font-size: 32px;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    
+    .currency {
+      font-size: 18px;
+      color: #666;
+    }
+    
+    .wallet-address {
+      font-family: monospace;
+      background-color: #f5f7fa;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      word-break: break-all;
+      margin-bottom: 25px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .wallet-address:hover {
+      background-color: #e9ecef;
+    }
+    
+    .qr-code {
+      margin: 20px auto;
+      width: 200px;
+      height: 200px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    
+    .qr-code img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+    
+    .loading-qr {
+      color: #999;
+      font-size: 14px;
+    }
+    
+    .expired-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 8px;
+      z-index: 2;
+    }
+    
+    .expired-message {
+      color: white;
+      text-align: center;
+    }
+    
+    .expired-message p {
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+    
+    .refresh-btn {
+      background-color: #1890ff;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+    
+    .refresh-btn:hover {
+      background-color: #40a9ff;
+    }
+    
+    .countdown {
+      margin-top: 20px;
+    }
+    
+    .validity-notice {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    
+    .timer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .time {
+      background-color: #333;
+      color: white;
+      font-size: 22px;
+      font-weight: bold;
+      padding: 5px 10px;
+      border-radius: 4px;
+      margin: 0 2px;
+    }
+    
+    .label {
+      margin: 0 5px;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 4px;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .toast.show {
+      opacity: 1;
+    }
+    
+    .tether-logo {
+      fill: #53ae94;
+    }
+    
+    .tether-logo-text {
+      fill: #fff;
+    }
+
+    .payment-memo {
+      margin-top: 15px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #1890ff;
+    }
+
+    .memo-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .memo-text {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .important {
+      color: #ff4d4f;
+      font-weight: 500;
+    }
+
+    .network-info {
+      margin-top: 20px;
+      border-top: 1px dashed #ddd;
+      padding-top: 15px;
+      font-size: 13px;
+      color: #888;
+    }
+
+    .active-network {
+      background-color: #1890ff !important;
+      color: white !important;
+      border-color: #1890ff !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="payment-container">
+    <div class="payment-card">
+      <div class="logo">
+        <svg viewBox="0 0 2000 2000" width="60" height="60" xmlns="http://www.w3.org/2000/svg">
+          <path class="tether-logo" d="M1000,0c552.26,0,1000,447.74,1000,1000S1552.24,2000,1000,2000,0,1552.38,0,1000,447.68,0,1000,0"></path>
+          <path class="tether-logo-text" d="M1123.42,866.76V718H1463.6V491.34H537.28V718H877.5V866.64C601,879.34,393.1,934.1,393.1,999.7s208,120.36,484.4,133.14v476.5h246V1132.8c276-12.74,483.48-67.46,483.48-133s-207.48-120.26-483.48-133m0,227.24v-0.12c-6.94.44-42.6,2.58-122,2.58-63.48,0-108.14-1.8-123.88-2.62v0.2c-246.4-11.2-410.1-43.92-410.1-83.66s163.7-72.46,410.1-83.66v0.2c15.86-.82,61.2-2.62,124.4-2.62,77.74,0,114.1,2.14,121.48,2.58v-0.12c245.6,11.2,409.22,43.92,409.22,83.62s-163.62,72.44-409.22,83.64"></path>
+        </svg>
+      </div>
+      
+      <div class="order-number">
+        <p>订单编号：<span id="orderId"></span></p>
+      </div>
+      
+      <div class="payment-network">
+        <p>当前<span id="currency">USDT</span>支付区块网络协议为<span id="network">TRC20</span></p>
+      </div>
+      
+      <div class="warning-message">
+        <p class="error">！到账金额必须与下方显示的金额一致，否则系统无法确认！！</p>
+        <p class="copy-tip">尝试点击钱包地址或金额可直接复制哦👇</p>
+      </div>
+      
+      <div class="payment-amount" id="amountContainer">
+        <span class="amount" id="amount">72.98</span>
+        <span class="currency" id="currencyLabel">USDT</span>
+      </div>
+      
+      <div class="wallet-address" id="walletAddress">
+        <!-- 钱包地址将通过JavaScript动态设置 -->
+      </div>
+      
+      <div class="qr-code" id="qrCodeContainer">
+        <div id="expiredOverlay" class="expired-overlay" style="display: none;">
+          <div class="expired-message">
+            <p>二维码已过期</p>
+            <button class="refresh-btn" id="refreshBtn">刷新二维码</button>
+          </div>
+        </div>
+        <canvas id="qrCode"></canvas>
+        <div id="loadingQr" class="loading-qr">生成二维码中...</div>
+      </div>
+      
+      <div class="payment-memo">
+        <div class="memo-title">付款说明</div>
+        <div class="memo-text">
+          <p>1. 使用<span class="important">任意支持${network}网络的钱包</span>扫描上方二维码</p>
+          <p>2. 付款金额请填写：<span class="important">${amount} ${currency}</span></p>
+          <p>3. <span class="important">务必备注订单号</span>进行转账：</p>
+          <p id="memoText">备注内容：ORDER_202504131</p>
+          <button class="refresh-btn" id="copyMemo" style="margin-top: 5px;">复制备注</button>
+        </div>
+      </div>
+      
+      <div class="countdown">
+        <p class="validity-notice">二维码有效期：2分钟</p>
+        <div class="timer">
+          <span class="time" id="hours">00</span>
+          <span class="label">时</span>
+          <span class="time" id="minutes">02</span>
+          <span class="label">分</span>
+          <span class="time" id="seconds">00</span>
+          <span class="label">秒</span>
+        </div>
+      </div>
+
+      <!-- 网络选择器 -->
+      <div class="network-selector" style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ddd;">
+        <p style="margin-bottom: 10px; font-size: 14px; color: #666;">选择支付网络：</p>
+        <div class="network-buttons" style="display: flex; justify-content: center; gap: 10px;">
+          <button id="network-trc20" class="network-btn active-network" style="padding: 8px 15px; border-radius: 4px; border: 1px solid #e0e0e0; background: #f5f5f5; cursor: pointer;">TRC20</button>
+          <button id="network-erc20" class="network-btn" style="padding: 8px 15px; border-radius: 4px; border: 1px solid #e0e0e0; background: #f5f5f5; cursor: pointer;">ERC20</button>
+          <button id="network-bep20" class="network-btn" style="padding: 8px 15px; border-radius: 4px; border: 1px solid #e0e0e0; background: #f5f5f5; cursor: pointer;">BEP20</button>
+        </div>
+      </div>
+
+      <div class="network-info">
+        <p>注意：在<span id="networkInfo">TRC20</span>网络上，付款时请在备注/memo中填写订单号，以便系统自动关联您的订单。没有备注的付款可能无法自动处理。</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast" id="toast"></div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 获取URL参数
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      // 设置默认值 - 所有钱包地址都从这里统一设置
+      const defaultWallet = 'TMKJoYUtd6f3XKEokSoUL5XrSgggT4T4uF';
+      const defaultAmount = '72.98';
+      const defaultCurrency = 'USDT';
+      const defaultNetwork = 'TRC20';
+      const defaultOrderId = generateOrderId();
+      const expiryMinutes = 2;
+      
+      // 网络对应的钱包地址 - 如需支持多网络，可在此配置
+      const networkWallets = {
+        'TRC20': defaultWallet,
+        'ERC20': defaultWallet, // 后续可改为ERC20钱包地址
+        'BEP20': defaultWallet  // 后续可改为BEP20钱包地址
+      };
+      
+      // 启动倒计时
+      let countdownInterval;
+      let expiryTime;
+      
+      // 获取支付信息
+      const network = urlParams.get('network') || defaultNetwork;
+      const amount = urlParams.get('amount') || defaultAmount;
+      const currency = urlParams.get('currency') || defaultCurrency;
+      const orderId = urlParams.get('orderId') || defaultOrderId;
+      
+      // 根据网络获取对应的钱包地址
+      const walletAddress = urlParams.get('address') || networkWallets[network] || defaultWallet;
+      
+      // 填充页面数据
+      document.getElementById('walletAddress').textContent = walletAddress;
+      document.getElementById('amount').textContent = amount;
+      document.getElementById('currency').textContent = currency;
+      document.getElementById('currencyLabel').textContent = currency;
+      document.getElementById('network').textContent = network;
+      document.getElementById('networkInfo').textContent = network;
+      document.getElementById('orderId').textContent = orderId;
+      document.getElementById('memoText').textContent = `备注内容：${orderId}`;
+      
+      // 更新付款说明
+      document.querySelector('.payment-memo .memo-text p:nth-child(1)').innerHTML = 
+        `1. 使用<span class="important">任意支持${network}网络的钱包</span>扫描上方二维码`;
+      document.querySelector('.payment-memo .memo-text p:nth-child(2)').innerHTML = 
+        `2. 付款金额请填写：<span class="important">${amount} ${currency}</span>`;
+      
+      // 生成二维码和启动倒计时
+      generateQRCode();
+      startCountdown();
+      
+      // 绑定事件监听器
+      document.getElementById('amountContainer').addEventListener('click', function() {
+        copyToClipboard(amount);
+      });
+      
+      document.getElementById('walletAddress').addEventListener('click', function() {
+        copyToClipboard(walletAddress);
+      });
+      
+      document.getElementById('refreshBtn').addEventListener('click', function() {
+        refreshQRCode();
+      });
+
+      document.getElementById('copyMemo').addEventListener('click', function() {
+        copyToClipboard(orderId);
+      });
+      
+      // 生成订单ID
+      function generateOrderId() {
+        const timestamp = new Date().getTime().toString();
+        const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        return `ORDER_${timestamp.substr(-10)}${random}`;
+      }
+      
+      // 生成二维码
+      function generateQRCode() {
+        const qrContainer = document.getElementById('qrCode');
+        const loadingElement = document.getElementById('loadingQr');
+        
+        // 显示加载中
+        loadingElement.style.display = 'block';
+        
+        // 二维码内容 - 仅包含钱包地址，大多数钱包只需要地址即可识别
+        const content = walletAddress;
+        
+        // 生成二维码
+        QRCode.toCanvas(qrContainer, content, {
+          width: 200,
+          margin: 1,
+          color: {
+            dark: '#000000',
+            light: '#ffffff'
+          }
+        }, function(error) {
+          if (error) {
+            console.error('Error generating QR code:', error);
+          }
+          // 隐藏加载中
+          loadingElement.style.display = 'none';
+        });
+      }
+      
+      // 启动倒计时
+      function startCountdown() {
+        // 隐藏过期遮罩
+        document.getElementById('expiredOverlay').style.display = 'none';
+        
+        // 设置过期时间 - 从现在开始2分钟
+        expiryTime = new Date();
+        expiryTime.setMinutes(expiryTime.getMinutes() + expiryMinutes);
+        
+        // 更新倒计时
+        updateRemainingTime();
+        
+        // 清除任何现有的计时器
+        if (countdownInterval) {
+          clearInterval(countdownInterval);
+        }
+        
+        // 每秒更新一次倒计时
+        countdownInterval = setInterval(updateRemainingTime, 1000);
+      }
+      
+      function updateRemainingTime() {
+        const now = new Date();
+        const diff = Math.max(0, Math.floor((expiryTime - now) / 1000));
+        
+        if (diff <= 0) {
+          clearInterval(countdownInterval);
+          
+          // 显示过期遮罩
+          document.getElementById('expiredOverlay').style.display = 'flex';
+          
+          // 重置计时器显示为00:00:00
+          document.getElementById('hours').textContent = '00';
+          document.getElementById('minutes').textContent = '00';
+          document.getElementById('seconds').textContent = '00';
+          
+          return;
+        }
+        
+        // 更新时间
+        const hours = Math.floor(diff / 3600);
+        const minutes = Math.floor((diff % 3600) / 60);
+        const seconds = diff % 60;
+        
+        document.getElementById('hours').textContent = formatTime(hours);
+        document.getElementById('minutes').textContent = formatTime(minutes);
+        document.getElementById('seconds').textContent = formatTime(seconds);
+      }
+      
+      function formatTime(value) {
+        return value.toString().padStart(2, '0');
+      }
+      
+      // 复制到剪贴板
+      function copyToClipboard(text) {
+        navigator.clipboard.writeText(text)
+          .then(() => {
+            showToast('复制成功！');
+          })
+          .catch(err => {
+            console.error('Failed to copy text: ', err);
+            
+            // 回退方案 - 创建一个临时元素
+            const tempElement = document.createElement('textarea');
+            tempElement.value = text;
+            document.body.appendChild(tempElement);
+            tempElement.select();
+            
+            try {
+              document.execCommand('copy');
+              showToast('复制成功！');
+            } catch (err) {
+              console.error('复制失败:', err);
+              showToast('复制失败，请手动复制');
+            }
+            
+            document.body.removeChild(tempElement);
+          });
+      }
+      
+      // 显示提示
+      function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 2000);
+      }
+      
+      // 刷新二维码
+      function refreshQRCode() {
+        generateQRCode();
+        startCountdown();
+      }
+
+      // 绑定网络选择器事件
+      document.getElementById('network-trc20').addEventListener('click', function() {
+        switchNetwork('TRC20');
+      });
+      
+      document.getElementById('network-erc20').addEventListener('click', function() {
+        switchNetwork('ERC20');
+      });
+      
+      document.getElementById('network-bep20').addEventListener('click', function() {
+        switchNetwork('BEP20');
+      });
+      
+      // 切换网络函数
+      function switchNetwork(newNetwork) {
+        // 更新当前选择的网络
+        network = newNetwork;
+        
+        // 更新UI显示
+        document.getElementById('network').textContent = network;
+        document.getElementById('networkInfo').textContent = network;
+        
+        // 更新钱包地址
+        const newWalletAddress = networkWallets[network] || defaultWallet;
+        document.getElementById('walletAddress').textContent = newWalletAddress;
+        
+        // 更新付款说明
+        document.querySelector('.payment-memo .memo-text p:nth-child(1)').innerHTML = 
+          `1. 使用<span class="important">任意支持${network}网络的钱包</span>扫描上方二维码`;
+        
+        // 更新网络按钮状态
+        document.querySelectorAll('.network-btn').forEach(btn => {
+          btn.classList.remove('active-network');
+        });
+        document.getElementById(`network-${network.toLowerCase()}`).classList.add('active-network');
+        
+        // 重新生成二维码
+        generateQRCode();
+        
+        // 重新启动倒计时
+        startCountdown();
+      }
+    });
+  </script>
+</body>
+</html> 
