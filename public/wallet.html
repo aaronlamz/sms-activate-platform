@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tron Wallet QR Generator</title>
+  <!-- Load external scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/tronweb@5.3.1/dist/TronWeb.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    .wallet-qr-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+    
+    .wallet-info {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      gap: 20px;
+    }
+    
+    .address-container, .qr-container {
+      flex: 1;
+      min-width: 300px;
+      padding: 20px;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .address {
+      word-break: break-all;
+      padding: 10px;
+      background-color: #eee;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    
+    #qrcode {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+    
+    button {
+      cursor: pointer;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+    
+    .copy-btn, .download-btn {
+      background-color: #4CAF50;
+      color: white;
+      width: 100%;
+    }
+    
+    .copy-btn:hover, .download-btn:hover {
+      background-color: #45a049;
+    }
+    
+    .actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    
+    .primary-btn {
+      background-color: #2196F3;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+    }
+    
+    .primary-btn:hover {
+      background-color: #0b7dda;
+    }
+    
+    .error-message {
+      color: #f44336;
+      margin-top: 20px;
+      text-align: center;
+      padding: 10px;
+      background-color: #ffebee;
+      border-radius: 4px;
+      display: none;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="wallet-qr-container">
+    <h1>Tron Wallet QR Generator</h1>
+    
+    <div id="wallet-info" class="wallet-info hidden">
+      <div class="address-container">
+        <h3>Wallet Address:</h3>
+        <div id="address" class="address"></div>
+        <button id="copy-btn" class="copy-btn">Copy Address</button>
+      </div>
+      
+      <div class="qr-container">
+        <h3>Address QR Code:</h3>
+        <div id="qrcode"></div>
+        <button id="download-btn" class="download-btn">Download QR Code</button>
+      </div>
+    </div>
+    
+    <div class="actions">
+      <button id="generate-btn" class="primary-btn">Generate New Wallet</button>
+    </div>
+
+    <div id="error-message" class="error-message"></div>
+  </div>
+
+  <script>
+    // Store wallet data
+    let walletData = {
+      address: '',
+      privateKey: ''
+    };
+    
+    // DOM elements
+    const walletInfoElement = document.getElementById('wallet-info');
+    const addressElement = document.getElementById('address');
+    const qrcodeElement = document.getElementById('qrcode');
+    const errorMessageElement = document.getElementById('error-message');
+    const generateBtn = document.getElementById('generate-btn');
+    const copyBtn = document.getElementById('copy-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    
+    // Function to show error message
+    function showError(message) {
+      errorMessageElement.textContent = message;
+      errorMessageElement.style.display = 'block';
+    }
+    
+    // Function to hide error message
+    function hideError() {
+      errorMessageElement.style.display = 'none';
+    }
+    
+    // Function to generate new wallet
+    function generateNewWallet() {
+      try {
+        if (typeof TronWeb === 'undefined') {
+          showError('TronWeb library not loaded. Please refresh the page.');
+          return;
+        }
+        
+        const tronWeb = new TronWeb({
+          fullHost: 'https://api.trongrid.io'
+        });
+        
+        // Create a new account
+        const account = tronWeb.createAccount();
+        walletData.address = account.address.base58;
+        walletData.privateKey = account.privateKey;
+        
+        // Display address
+        addressElement.textContent = walletData.address;
+        
+        // Show wallet info section
+        walletInfoElement.classList.remove('hidden');
+        
+        // Generate QR code
+        generateQRCode(walletData.address);
+        
+        hideError();
+      } catch (error) {
+        console.error('Error generating wallet:', error);
+        showError('Failed to generate wallet. ' + error.message);
+      }
+    }
+    
+    // Function to generate QR code
+    function generateQRCode(data) {
+      if (typeof QRCode === 'undefined') {
+        showError('QR Code library not loaded. Please refresh the page.');
+        return;
+      }
+      
+      // Clear previous QR code if any
+      qrcodeElement.innerHTML = '';
+      
+      // Generate new QR code
+      new QRCode(qrcodeElement, {
+        text: data,
+        width: 256,
+        height: 256,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
+    
+    // Function to copy address to clipboard
+    function copyToClipboard() {
+      if (!walletData.address) {
+        showError('No address to copy. Please generate a wallet first.');
+        return;
+      }
+      
+      navigator.clipboard.writeText(walletData.address)
+        .then(() => {
+          alert('Address copied to clipboard!');
+        })
+        .catch(err => {
+          console.error('Failed to copy text: ', err);
+          showError('Failed to copy address.');
+        });
+    }
+    
+    // Function to download QR code
+    function downloadQR() {
+      try {
+        const canvas = qrcodeElement.querySelector('canvas');
+        if (!canvas) {
+          showError('QR code not found. Please generate it first.');
+          return;
+        }
+        
+        const link = document.createElement('a');
+        link.download = 'tron-wallet-qr.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } catch (error) {
+        console.error('Error downloading QR code:', error);
+        showError('Failed to download QR code.');
+      }
+    }
+    
+    // Event listeners
+    generateBtn.addEventListener('click', generateNewWallet);
+    copyBtn.addEventListener('click', copyToClipboard);
+    downloadBtn.addEventListener('click', downloadQR);
+    
+    // Generate wallet on page load
+    document.addEventListener('DOMContentLoaded', generateNewWallet);
+  </script>
+</body>
+</html> 
