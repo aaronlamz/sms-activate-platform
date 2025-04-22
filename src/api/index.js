@@ -1,7 +1,14 @@
 import axios from 'axios'
 
-// 根据当前访问方式动态确定API基础URL
+// 根据当前访问方式或配置文件动态确定API基础URL
 function getBaseUrl() {
+  // 检查是否有配置文件且有API域名配置
+  if (window.domainConfig && window.domainConfig.apiUrl) {
+    // 优先使用配置文件中的API域名
+    return `${window.domainConfig.apiUrl}/api`
+  }
+
+  // 作为后备方案，使用之前的逻辑
   // 获取当前协议(http/https)
   const protocol = window.location.protocol
   const currentHost = window.location.hostname

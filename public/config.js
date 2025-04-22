@@ -11,7 +11,7 @@ window.domainConfig = {
   paymentUrl: 'https://{subdomain}.u93.us',
 
   // API服务域名配置
-  apiUrl: 'https://api.dingzan.vip',
+  apiUrl: 'https://api.uu66.us',
 
   // 子域名长度配置 - 指定随机生成的子域名字符数量(默认为2)
   subdomainLength: 3,
