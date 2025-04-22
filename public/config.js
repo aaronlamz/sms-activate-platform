@@ -13,6 +13,9 @@ window.domainConfig = {
   // API服务域名配置
   apiUrl: 'https://api.dingzan.vip',
 
+  // 子域名长度配置 - 指定随机生成的子域名字符数量(默认为2)
+  subdomainLength: 3,
+
   // 其他可能需要的域名配置
   // cdnUrl: 'https://cdn.example.com',
 }
