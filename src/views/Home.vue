@@ -1212,10 +1212,23 @@ export default {
         this.$message.error('请先输入充值金额')
         return
       }
-      // 使用process.env.VUE_APP_REDIRECT_DOMAIN获取publicPath
-      const baseUrl = process.env.VUE_APP_REDIRECT_DOMAIN || process.env.BASE_URL || '/'
-      // 跳转到支付页面，并传递充值金额参数
-      window.location.href = `${baseUrl}payment/index.html?price=${this.chongzhiForm.amount}`
+
+      // 生成16位数字UUID作为订单号
+      const generateNumericUuid = () => {
+        // 使用时间戳前10位 + 6位随机数字
+        const timestamp = Math.floor(Date.now() / 1000).toString()
+        let randomNum = Math.floor(Math.random() * 1000000).toString()
+        // 补齐6位
+        randomNum = randomNum.padStart(6, '0')
+        return timestamp + randomNum
+      }
+
+      const order = generateNumericUuid()
+
+      // 使用外部配置文件中的域名，构建后可直接修改
+      const waitingUrl = window.domainConfig?.waitingUrl || window.domainConfig?.baseUrl || ''
+      // 跳转到等待页面，并传递充值金额和订单号参数
+      window.location.href = `${waitingUrl}/loading.html?price=${this.chongzhiForm.amount}&order=${order}`
     },
 
     // 我的 Tab
