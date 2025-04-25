@@ -1187,26 +1187,26 @@ export default {
     },
     onRecharge() {
       // 判断用户是否登录
-      if (!localStorage.getItem('smsToken')) {
-        this.$confirm('请先登录', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          showCancelButton: false,
-          type: 'warning',
-        })
-          .then(() => {
-            // 用户点击确认，跳转到登录页面
-            this.$router.push('/login')
-          })
-          .catch(() => {
-            // 用户点击取消，停留在当前页面
-            this.$message({
-              type: 'info',
-              message: '已取消跳转',
-            })
-          })
-        return
-      }
+      // if (!localStorage.getItem('smsToken')) {
+      //   this.$confirm('请先登录', '提示', {
+      //     confirmButtonText: '确定',
+      //     cancelButtonText: '取消',
+      //     showCancelButton: false,
+      //     type: 'warning',
+      //   })
+      //     .then(() => {
+      //       // 用户点击确认，跳转到登录页面
+      //       this.$router.push('/login')
+      //     })
+      //     .catch(() => {
+      //       // 用户点击取消，停留在当前页面
+      //       this.$message({
+      //         type: 'info',
+      //         message: '已取消跳转',
+      //       })
+      //     })
+      //   return
+      // }
 
       if (!this.chongzhiForm.amount) {
         this.$message.error('请先输入充值金额')
@@ -1251,29 +1251,29 @@ export default {
   watch: {
     // 监听标签页切换
     activeTab(newVal) {
-      if (newVal === 'wode') {
-        // 检查是否登录
-        if (!localStorage.getItem('smsToken')) {
-          this.$confirm('请先登录', '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            showCancelButton: false,
-            type: 'warning',
-          })
-            .then(() => {
-              // 用户点击确认，跳转到登录页面
-              this.$router.push('/login')
-            })
-            .catch(() => {
-              // 用户点击取消，切换回接码tab
-              this.activeTab = 'jiema'
-              this.$message({
-                type: 'info',
-                message: '已取消跳转',
-              })
-            })
-        }
-      }
+      // if (newVal === 'wode') {
+      //   // 检查是否登录
+      //   if (!localStorage.getItem('smsToken')) {
+      //     this.$confirm('请先登录', '提示', {
+      //       confirmButtonText: '确定',
+      //       cancelButtonText: '取消',
+      //       showCancelButton: false,
+      //       type: 'warning',
+      //     })
+      //       .then(() => {
+      //         // 用户点击确认，跳转到登录页面
+      //         this.$router.push('/login')
+      //       })
+      //       .catch(() => {
+      //         // 用户点击取消，切换回接码tab
+      //         this.activeTab = 'jiema'
+      //         this.$message({
+      //           type: 'info',
+      //           message: '已取消跳转',
+      //         })
+      //       })
+      //   }
+      // }
     },
     // 监听运营商变化
     'jiemaForm.carrier'(newVal) {
